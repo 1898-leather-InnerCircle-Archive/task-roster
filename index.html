@@ -1,250 +1,544 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>1898 Leather - Task Management System</title>
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
-    <style>
-      .task-row { border-bottom: 1px solid #e5e7eb; transition: all 0.2s; }
-      .task-row:hover { background-color: #f9fafb; }
-      .header-row { background-color: #f3f4f6; font-weight: 600; }
-      textarea:focus { outline: none; background: white; box-shadow: 0 0 0 2px #bfdbfe; }
-      #loginOverlay { backdrop-filter: blur(8px); }
-    </style>
-  </head>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>1898 Leather - Task Management System</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
+  <style>
+    body { font-family: 'Inter', sans-serif; color: #1f2937; }
 
-  <body class="bg-gray-50 min-h-screen relative">
-    
-    <div id="loginOverlay" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 transition-opacity duration-500">
-      <div class="bg-white p-8 rounded-xl shadow-2xl max-w-md w-full mx-4 border-t-8 border-blue-600">
-        <h2 class="text-2xl font-bold text-gray-900 mb-2 text-center">Security Access</h2>
-        <p class="text-gray-500 text-center mb-6 text-sm">Please enter your GitHub Personal Access Token to manage 1898 Leather tasks.</p>
-        <input type="password" id="tokenInput" placeholder="ghp_xxxxxxxxxxxx" class="w-full border border-gray-300 rounded-lg px-4 py-3 mb-4 focus:ring-2 focus:ring-blue-500 outline-none transition-all" />
-        <button onclick="saveTokenAndLoad()" class="w-full bg-blue-600 text-white font-bold py-3 rounded-lg hover:bg-blue-700 shadow-lg transition-colors">
-          Unlock System
-        </button>
+    .task-row { border-bottom: 1px solid #f3f4f6; transition: all 0.2s; }
+    .task-row:hover { background-color: #f9fafb; }
+
+    .priority-High { border-left: 4px solid #ef4444; }
+    .priority-Medium { border-left: 4px solid #f59e0b; }
+    .priority-Low { border-left: 4px solid #10b981; }
+
+    .pill {
+      padding: 6px 10px;
+      border-radius: 9999px;
+      font-size: 10px;
+      font-weight: 800;
+      text-transform: uppercase;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: opacity 0.2s;
+      line-height: 1.1;
+    }
+    .pill:hover { opacity: 0.85; }
+
+    .tab-active { background: #1f2937; color: white; border-color: #1f2937; }
+    #loginOverlay { backdrop-filter: blur(10px); }
+
+    .header-column { cursor: pointer; user-select: none; transition: all 0.2s; border-radius: 10px; }
+    .header-column:hover { color: #2563eb; background-color: #f3f4f6; }
+
+    select.appearance-none { -webkit-appearance: none; -moz-appearance: none; appearance: none; text-align-last: center; }
+
+    .table-grid {
+      display: grid;
+      grid-template-columns: 110px minmax(320px, 1fr) 170px 170px 120px 110px 140px;
+      column-gap: 0;
+      align-items: center;
+    }
+
+    .head-cell { padding: 10px 14px; }
+    .cell { padding: 12px 14px; }
+
+    .cell-center { text-align: center; }
+    .cell-right { text-align: right; }
+
+    .id-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 12px;
+      border-radius: 9999px;
+      font-size: 12px;
+      font-weight: 900;
+      letter-spacing: .06em;
+      background: #111827;
+      color: #fff;
+      box-shadow: 0 6px 14px rgba(17, 24, 39, 0.18);
+      white-space: nowrap;
+    }
+    .id-dot { width: 8px; height: 8px; border-radius: 9999px; background: #60a5fa; }
+
+    .notes-wrap {
+      white-space: normal;
+      word-break: break-word;
+      overflow-wrap: anywhere;
+      line-height: 1.35;
+    }
+
+    @media (max-width: 768px) {
+      .table-wrapper { overflow-x: auto; }
+      .table-min { min-width: 1100px; }
+    }
+  </style>
+</head>
+
+<body class="bg-gray-50 min-h-screen pb-20">
+
+  <div id="loginOverlay" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60">
+    <div class="bg-white p-8 rounded-xl shadow-2xl max-w-sm w-full mx-4 border-t-4 border-blue-600">
+      <h2 class="text-xl font-bold mb-4 text-center text-gray-800">Security Access</h2>
+      <input type="password" id="tokenInput" placeholder="Enter GitHub Token"
+        class="w-full border rounded-lg px-4 py-2 mb-4 focus:ring-2 focus:ring-blue-500 outline-none" />
+      <button onclick="saveTokenAndLoad()"
+        class="w-full bg-blue-600 text-white font-bold py-2 rounded-lg hover:bg-blue-700 transition">Unlock System</button>
+    </div>
+  </div>
+
+  <div id="mainContent" class="container mx-auto px-4 py-8 max-w-7xl opacity-0 transition-opacity duration-500">
+
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+      <div>
+        <h1 class="text-3xl font-extrabold text-gray-900 tracking-tight">1898 Leather</h1>
+        <p class="text-gray-500 font-medium tracking-wide">TASK MANAGEMENT SYSTEM</p>
+        <p class="text-xs text-gray-400 mt-2 uppercase">Sync Status:
+          <span id="syncIndicator" class="text-gray-600">Idle</span>
+        </p>
+      </div>
+      <div class="mt-4 md:mt-0 text-right">
+        <div id="statTotal" class="text-4xl font-black text-blue-600 leading-none">0</div>
+        <div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">Total Tasks</div>
       </div>
     </div>
 
-    <div id="mainContent" class="container mx-auto px-4 py-8 max-w-7xl opacity-20 transition-opacity duration-1000">
-      <div class="bg-white rounded-lg shadow-lg p-6 mb-8 border-b-4 border-blue-600 flex flex-col md:flex-row justify-between items-center gap-4">
-        <div>
-          <h1 class="text-3xl font-bold text-gray-900">1898 Leather</h1>
-          <h2 class="text-xl text-gray-600 italic">Task Management System</h2>
-        </div>
-        <div class="flex items-center gap-4">
-          <button onclick="addNewTask()" class="bg-blue-600 text-white px-4 py-2 rounded-lg font-bold text-sm hover:bg-blue-700 shadow transition-all">+ Add New Task</button>
-          <span id="syncStatus" class="text-xs font-bold uppercase px-3 py-1 rounded-full bg-gray-100 text-gray-500 italic border border-gray-200">Waiting...</span>
-        </div>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+      <div onclick="applyQuickFilter('status', 'in-progress')"
+        class="bg-white p-4 rounded-lg shadow-sm border-l-4 border-yellow-400 cursor-pointer hover:shadow-md transition">
+        <div id="statProgress" class="text-xl font-bold text-gray-800">0</div>
+        <div class="text-[10px] text-gray-400 font-bold uppercase">In Progress</div>
       </div>
-
-      <div class="bg-white rounded-lg shadow p-6 mb-8 grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label class="block text-xs uppercase tracking-widest text-gray-500 font-bold">Search Tasks</label>
-          <input id="searchInput" type="search" placeholder="Filter by name or notes..." class="mt-2 w-full rounded border border-gray-200 px-4 py-2 text-sm focus:ring-2 focus:ring-blue-200 outline-none transition-all" />
-        </div>
-        <div>
-          <label class="block text-xs uppercase tracking-widest text-gray-500 font-bold">Status Filter</label>
-          <select id="statusFilter" class="mt-2 w-full rounded border border-gray-200 px-4 py-2 text-sm outline-none cursor-pointer">
-            <option value="all">All Status</option>
-            <option value="in-progress">In Progress</option>
-            <option value="pending">Pending</option>
-            <option value="planning">Planning</option>
-            <option value="completed">Completed</option>
-          </select>
-        </div>
+      <div onclick="applyQuickFilter('status', 'completed')"
+        class="bg-white p-4 rounded-lg shadow-sm border-l-4 border-green-500 cursor-pointer hover:shadow-md transition">
+        <div id="statCompleted" class="text-xl font-bold text-gray-800">0</div>
+        <div class="text-[10px] text-gray-400 font-bold uppercase">Completed</div>
       </div>
-
-      <div class="bg-white rounded-lg shadow overflow-hidden">
-        <div class="header-row px-6 py-3 grid grid-cols-1 md:grid-cols-6 gap-4 text-xs uppercase tracking-wider text-gray-600 border-b">
-          <div>ID</div>
-          <div>Task Name</div>
-          <div>Notes</div>
-          <div>Status</div>
-          <div>Updated</div>
-          <div>Priority</div>
-        </div>
-        <div id="taskRows" class="divide-y divide-gray-200 italic text-gray-400"></div>
+      <div onclick="applyQuickFilter('priority', 'High')"
+        class="bg-white p-4 rounded-lg shadow-sm border-l-4 border-red-500 cursor-pointer hover:shadow-md transition">
+        <div id="statHigh" class="text-xl font-bold text-gray-800">0</div>
+        <div class="text-[10px] text-gray-400 font-bold uppercase">High Priority</div>
+      </div>
+      <div class="bg-blue-600 p-4 rounded-lg shadow-sm cursor-pointer hover:bg-blue-700 transition text-white"
+        onclick="toggleModal()">
+        <div class="text-xl font-bold">+ New</div>
+        <div class="text-[10px] font-bold uppercase opacity-80">Strategic Task</div>
       </div>
     </div>
 
-    <script>
-      const GITHUB_CONFIG = {
-          owner: '1898-leather-InnerCircle-Archive',
-          repo: 'task-roster', // Verifica si el repo se llama solo 'task-roster' o '1898-leather-InnerCircle-Archive/task-roster'
-          path: 'tasks.json'
+    <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 mb-6 space-y-4">
+      <div class="flex flex-wrap items-center justify-between gap-4">
+        <div class="flex bg-gray-100 p-1 rounded-lg">
+          <button onclick="setBucket('all')" id="tab-all" class="bucket-tab tab-active px-4 py-1.5 rounded-md text-xs font-bold transition">ALL</button>
+          <button onclick="setBucket('do')" id="tab-do" class="bucket-tab px-4 py-1.5 rounded-md text-xs font-bold transition">DO</button>
+          <button onclick="setBucket('schedule')" id="tab-schedule" class="bucket-tab px-4 py-1.5 rounded-md text-xs font-bold transition">SCHEDULE</button>
+          <button onclick="setBucket('delegate')" id="tab-delegate" class="bucket-tab px-4 py-1.5 rounded-md text-xs font-bold transition">DELEGATE</button>
+        </div>
+        <div class="flex gap-2 flex-1 max-w-md">
+          <input id="searchInput" type="search" placeholder="Search tasks..."
+            class="w-full bg-gray-50 border-none rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-blue-400 outline-none" />
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 table-wrapper">
+      <div class="table-min">
+        <div class="bg-gray-50 table-grid text-[10px] font-black uppercase text-gray-400 border-b tracking-wider">
+          <div class="head-cell">ID</div>
+          <div class="head-cell header-column" onclick="sortBy('name')">Description ↕</div>
+          <div class="head-cell header-column cell-center" onclick="sortBy('status')">Status ↕</div>
+          <div class="head-cell header-column cell-center" onclick="sortBy('bucket')">Eisenhower ↕</div>
+          <div class="head-cell header-column cell-center" onclick="sortBy('priority')">Priority ↕</div>
+          <div class="head-cell cell-center">Date</div>
+          <div class="head-cell cell-right">Actions</div>
+        </div>
+
+        <div id="taskRows" class="divide-y divide-gray-50"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- New Task Modal -->
+  <div id="modalOverlay" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black bg-opacity-40 p-4">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden">
+      <div class="p-6">
+        <h3 class="text-lg font-bold mb-4">New Entry</h3>
+        <div class="space-y-4">
+          <input type="text" id="newTaskName" placeholder="Task title..."
+            class="w-full border rounded-lg p-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+          <div class="grid grid-cols-2 gap-4">
+            <select id="newTaskBucket" class="border rounded-lg p-2 text-sm">
+              <option value="do">Do (Urgent)</option>
+              <option value="schedule" selected>Schedule</option>
+              <option value="delegate">Delegate</option>
+            </select>
+            <select id="newTaskPriority" class="border rounded-lg p-2 text-sm">
+              <option value="High">High</option>
+              <option value="Medium" selected>Medium</option>
+              <option value="Low">Low</option>
+            </select>
+          </div>
+          <textarea id="newTaskNotes" placeholder="Notes..."
+            class="w-full border rounded-lg p-3 text-sm h-24 outline-none"></textarea>
+          <div class="flex gap-3">
+            <button onclick="toggleModal()"
+              class="flex-1 px-4 py-2 border rounded-lg text-sm font-bold text-gray-500 hover:bg-gray-50">Cancel</button>
+            <button onclick="submitNewTask()"
+              class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-bold hover:bg-blue-700">Save Task</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Modal -->
+  <div id="editOverlay" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black bg-opacity-40 p-4">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden">
+      <div class="p-6">
+        <h3 class="text-lg font-bold mb-4">Edit Task</h3>
+        <div class="space-y-4">
+          <input type="text" id="editTaskName" placeholder="Task title..."
+            class="w-full border rounded-lg p-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+          <textarea id="editTaskNotes" placeholder="Notes..."
+            class="w-full border rounded-lg p-3 text-sm h-32 outline-none"></textarea>
+
+          <div class="flex gap-3">
+            <button onclick="toggleEditModal(false)"
+              class="flex-1 px-4 py-2 border rounded-lg text-sm font-bold text-gray-500 hover:bg-gray-50">Cancel</button>
+            <button onclick="saveEdit()"
+              class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-bold hover:bg-blue-700">Save Changes</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const GITHUB_CONFIG = { owner: '1898-leather-InnerCircle-Archive', repo: 'task-roster', path: 'tasks.json' };
+    let tasks = [];
+    let currentBucket = 'all';
+    let currentToken = sessionStorage.getItem('gh_token');
+    let sortState = { key: 'id', asc: false };
+    let editingId = null;
+
+    function saveTokenAndLoad() {
+      const val = document.getElementById('tokenInput').value.trim();
+      if (val) {
+        sessionStorage.setItem('gh_token', val);
+        currentToken = val;
+        unlockApp();
+      }
+    }
+
+    function unlockApp() {
+      document.getElementById('loginOverlay').classList.add('hidden');
+      document.getElementById('mainContent').style.opacity = "1";
+      loadTasks();
+    }
+
+    // ✅ Fix: decode GitHub base64 content safely as UTF-8
+    function decodeBase64Utf8(b64) {
+      const clean = String(b64 || '').replace(/\n/g, '');
+      const binary = atob(clean);
+      const bytes = Uint8Array.from(binary, c => c.charCodeAt(0));
+      return new TextDecoder('utf-8').decode(bytes);
+    }
+
+    async function loadTasks() {
+      updateIndicator('Syncing...', 'yellow');
+      try {
+        const resp = await fetch(
+          `https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/contents/${GITHUB_CONFIG.path}?t=${Date.now()}`,
+          { headers: { 'Authorization': `token ${currentToken}` } }
+        );
+
+        if (!resp.ok) throw new Error(`GitHub fetch failed: ${resp.status}`);
+        const data = await resp.json();
+        if (!data.content) throw new Error('Missing content (bad token or path?)');
+
+        const jsonText = decodeBase64Utf8(data.content).trim().replace(/^\uFEFF/, ''); // remove BOM if any
+        tasks = JSON.parse(jsonText);
+
+        if (!Array.isArray(tasks)) throw new Error('tasks.json is not an array');
+
+        updateDashboard();
+        render();
+        updateIndicator('Synced', 'green');
+      } catch (e) {
+        console.error("LOAD ERROR:", e);
+        updateIndicator('Data Error', 'red');
+        // Optional: show a friendly message
+        document.getElementById('taskRows').innerHTML =
+          `<div class="p-6 text-sm text-red-600">
+            Could not load tasks.json. Open console for details.
+          </div>`;
+      }
+    }
+
+    function updateDashboard() {
+      document.getElementById('statTotal').textContent = tasks.length;
+      document.getElementById('statProgress').textContent = tasks.filter(t => t.status === 'in-progress').length;
+      document.getElementById('statCompleted').textContent = tasks.filter(t => t.status === 'completed').length;
+      document.getElementById('statHigh').textContent = tasks.filter(t => t.priority === 'High').length;
+    }
+
+    function setBucket(bucket) {
+      currentBucket = bucket;
+      document.querySelectorAll('.bucket-tab').forEach(t => t.classList.remove('tab-active'));
+      document.getElementById(`tab-${bucket}`).classList.add('tab-active');
+      render();
+    }
+
+    function applyQuickFilter(key, value) {
+      setBucket('all');
+      document.getElementById('searchInput').value = '';
+      render({ quick: { key, value } });
+    }
+
+    function render(opts = {}) {
+      const query = (document.getElementById('searchInput').value || '').toLowerCase();
+      const quick = opts.quick || null;
+
+      const filtered = tasks.filter(t => {
+        const hay = (t.name + " " + (t.notes || "")).toLowerCase();
+        const matchesSearch = hay.includes(query);
+        const matchesBucket = currentBucket === 'all' || t.bucket === currentBucket;
+        const matchesQuick = !quick || (String(t[quick.key] || '').toLowerCase() === String(quick.value).toLowerCase());
+        return matchesSearch && matchesBucket && matchesQuick;
+      });
+
+      const statusStyles = {
+        "in-progress": "bg-yellow-100 text-yellow-700",
+        "pending": "bg-blue-100 text-blue-700",
+        "planning": "bg-purple-100 text-purple-700",
+        "completed": "bg-green-100 text-green-700"
       };
 
-      let tasks = [];
-      let currentToken = sessionStorage.getItem('gh_token');
+      const bucketStyles = {
+        "do": "bg-red-50 text-red-600 border-red-100",
+        "schedule": "bg-blue-50 text-blue-600 border-blue-100",
+        "delegate": "bg-yellow-50 text-yellow-600 border-yellow-100"
+      };
 
-      // ====== MANEJO DE ACCESO ======
-      function saveTokenAndLoad() {
-          const input = document.getElementById('tokenInput');
-          if (input.value.trim().length > 10) {
-              sessionStorage.setItem('gh_token', input.value.trim());
-              currentToken = input.value.trim();
-              unlockApp();
-          } else {
-              alert("Please enter a valid token.");
-          }
+      const priorityStyles = {
+        "High": "bg-red-600 text-white",
+        "Medium": "bg-gray-200 text-gray-700",
+        "Low": "bg-gray-100 text-gray-600"
+      };
+
+      document.getElementById('taskRows').innerHTML = filtered.map(t => `
+        <div class="task-row table-grid priority-${t.priority}">
+          <div class="cell">
+            <span class="id-badge">
+              <span class="id-dot"></span>
+              #${escapeHtml(t.id.split('-')[1] || t.id)}
+            </span>
+          </div>
+
+          <div class="cell">
+            <div class="text-sm font-bold text-gray-800">${escapeHtml(t.name)}</div>
+            <div class="text-[11px] text-gray-500 mt-1 notes-wrap">${escapeHtml(t.notes || '')}</div>
+          </div>
+
+          <div class="cell cell-center">
+            <select onchange="updateTask('${t.id}', {status: this.value})"
+              class="pill appearance-none ${statusStyles[t.status] || 'bg-gray-100 text-gray-700'} outline-none w-full text-center">
+              <option value="in-progress" ${t.status === 'in-progress' ? 'selected' : ''}>In Progress</option>
+              <option value="pending" ${t.status === 'pending' ? 'selected' : ''}>Pending</option>
+              <option value="planning" ${t.status === 'planning' ? 'selected' : ''}>Planning</option>
+              <option value="completed" ${t.status === 'completed' ? 'selected' : ''}>Completed</option>
+            </select>
+          </div>
+
+          <div class="cell cell-center">
+            <select onchange="updateTask('${t.id}', {bucket: this.value})"
+              class="pill appearance-none ${bucketStyles[t.bucket] || 'bg-gray-50 text-gray-600 border-gray-100'} outline-none w-full text-center">
+              <option value="do" ${t.bucket === 'do' ? 'selected' : ''}>DO</option>
+              <option value="schedule" ${t.bucket === 'schedule' ? 'selected' : ''}>SCHEDULE</option>
+              <option value="delegate" ${t.bucket === 'delegate' ? 'selected' : ''}>DELEGATE</option>
+            </select>
+          </div>
+
+          <div class="cell cell-center">
+            <select onchange="updateTask('${t.id}', {priority: this.value})"
+              class="pill appearance-none ${priorityStyles[t.priority] || 'bg-gray-100 text-gray-700'} outline-none w-full text-center">
+              <option value="High" ${t.priority === 'High' ? 'selected' : ''}>HIGH</option>
+              <option value="Medium" ${t.priority === 'Medium' ? 'selected' : ''}>MED</option>
+              <option value="Low" ${t.priority === 'Low' ? 'selected' : ''}>LOW</option>
+            </select>
+          </div>
+
+          <div class="cell cell-center text-[11px] text-gray-600 font-semibold">
+            ${(t.lastTouched || '').split('-').slice(1).join('/') || '--'}
+          </div>
+
+          <div class="cell cell-right flex items-center justify-end gap-2">
+            <button onclick="openEdit('${t.id}')"
+              class="inline-flex items-center justify-center w-9 h-9 rounded-lg text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition"
+              title="Edit">
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M16.862 3.487a2.1 2.1 0 0 1 2.97 2.97L8.5 17.79 4 19l1.21-4.5L16.862 3.487z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M15 5l4 4" />
+              </svg>
+            </button>
+
+            <button onclick="deleteTask('${t.id}')"
+              class="inline-flex items-center justify-center w-9 h-9 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 transition"
+              title="Delete">
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7h16" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 11v6" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 11v6" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M6 7l1 14a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-14" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M9 7V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v3" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      `).join("");
+    }
+
+    async function updateTask(id, fields) {
+      const idx = tasks.findIndex(t => t.id === id);
+      if (idx === -1) return;
+
+      tasks[idx] = { ...tasks[idx], ...fields, lastTouched: new Date().toISOString().split('T')[0] };
+      await sync();
+      render();
+      updateDashboard();
+    }
+
+    async function deleteTask(id) {
+      if (!confirm("Delete this task?")) return;
+      tasks = tasks.filter(t => t.id !== id);
+      await sync();
+      render();
+      updateDashboard();
+    }
+
+    async function sync() {
+      updateIndicator('Saving...', 'yellow');
+      try {
+        const f = await fetch(`https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/contents/${GITHUB_CONFIG.path}`, {
+          headers: { 'Authorization': `token ${currentToken}` }
+        });
+        if (!f.ok) throw new Error('Failed to fetch file metadata');
+        const fd = await f.json();
+        if (!fd.sha) throw new Error('Missing SHA');
+
+        const payload = JSON.stringify(tasks, null, 2);
+        const contentB64 = btoa(unescape(encodeURIComponent(payload)));
+
+        const put = await fetch(`https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/contents/${GITHUB_CONFIG.path}`, {
+          method: 'PUT',
+          headers: { 'Authorization': `token ${currentToken}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message: "System Update", content: contentB64, sha: fd.sha })
+        });
+        if (!put.ok) throw new Error('PUT failed');
+
+        updateIndicator('Synced', 'green');
+      } catch (e) {
+        console.error("SYNC ERROR:", e);
+        updateIndicator('Error', 'red');
       }
+    }
 
-      function unlockApp() {
-          document.getElementById('loginOverlay').classList.add('hidden');
-          document.getElementById('mainContent').classList.remove('opacity-20');
-          loadTasks();
-      }
+    function toggleModal() {
+      document.getElementById('modalOverlay').classList.toggle('hidden');
+    }
 
-      // ====== OPERACIONES DE API ======
-      async function loadTasks() {
-          updateSyncStatus('Syncing...', 'yellow');
-          try {
-              const resp = await fetch(`https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/contents/${GITHUB_CONFIG.path}?t=${new Date().getTime()}`, {
-                  headers: { 'Authorization': `token ${currentToken}` }
-              });
-              
-              if (!resp.ok) throw new Error('Token inválido o error de repo');
-              
-              const data = await resp.json();
-              tasks = JSON.parse(atob(data.content));
-              render();
-              updateSyncStatus('Synced', 'green');
-          } catch (e) {
-              console.error(e);
-              updateSyncStatus('Auth Error', 'red');
-              sessionStorage.removeItem('gh_token');
-              alert("Failed to access GitHub. Please check your token and repository name.");
-              location.reload();
-          }
-      }
+    async function submitNewTask() {
+      const name = document.getElementById('newTaskName').value.trim();
+      if (!name) return;
 
-      async function updateGitHub(taskId, updatedFields) {
-          updateSyncStatus('Saving...', 'yellow');
-          try {
-              const fileResp = await fetch(`https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/contents/${GITHUB_CONFIG.path}`, {
-                  headers: { 'Authorization': `token ${currentToken}` }
-              });
-              const fileData = await fileResp.json();
-              
-              const index = tasks.findIndex(t => t.id === taskId);
-              tasks[index] = { 
-                ...tasks[index], 
-                ...updatedFields, 
-                lastTouched: new Date().toISOString().split('T')[0] 
-              };
+      const n = {
+        id: `T-${Math.floor(Math.random() * 9000) + 1000}`,
+        name,
+        notes: document.getElementById('newTaskNotes').value.trim(),
+        status: 'pending',
+        priority: document.getElementById('newTaskPriority').value,
+        bucket: document.getElementById('newTaskBucket').value,
+        lastTouched: new Date().toISOString().split('T')[0]
+      };
 
-              const updateResp = await fetch(`https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/contents/${GITHUB_CONFIG.path}`, {
-                  method: 'PUT',
-                  headers: {
-                      'Authorization': `token ${currentToken}`,
-                      'Content-Type': 'application/json'
-                  },
-                  body: JSON.stringify({
-                      message: `Task Update: ${taskId}`,
-                      content: btoa(unescape(encodeURIComponent(JSON.stringify(tasks, null, 2)))),
-                      sha: fileData.sha
-                  })
-              });
+      tasks.unshift(n);
+      await sync();
+      toggleModal();
+      render();
+      updateDashboard();
 
-              if (updateResp.ok) {
-                  updateSyncStatus('Saved', 'green');
-                  render();
-              }
-          } catch (e) {
-              updateSyncStatus('Error', 'red');
-              alert("Connection lost. Check your internet or token.");
-          }
-      }
+      document.getElementById('newTaskName').value = "";
+      document.getElementById('newTaskNotes').value = "";
+    }
 
-      async function addNewTask() {
-          const name = prompt("Enter new task name:");
-          if (!name) return;
-          
-          const newTask = {
-              id: `TASK-${Math.floor(Math.random() * 900) + 100}`,
-              name: name,
-              notes: "Write details here...",
-              status: "pending",
-              lastTouched: new Date().toISOString().split('T')[0],
-              priority: "Medium"
-          };
-          
-          tasks.unshift(newTask);
-          updateSyncStatus('Adding...', 'yellow');
-          
-          // Reutilizamos la lógica de PUT para subir todo el array actualizado
-          const fileResp = await fetch(`https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/contents/${GITHUB_CONFIG.path}`, {
-              headers: { 'Authorization': `token ${currentToken}` }
-          });
-          const fileData = await fileResp.json();
-          
-          await fetch(`https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/contents/${GITHUB_CONFIG.path}`, {
-              method: 'PUT',
-              headers: { 'Authorization': `token ${currentToken}`, 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                  message: `New Task: ${newTask.id}`,
-                  content: btoa(unescape(encodeURIComponent(JSON.stringify(tasks, null, 2)))),
-                  sha: fileData.sha
-              })
-          });
-          
-          updateSyncStatus('Saved', 'green');
-          render();
-      }
+    function updateIndicator(text, color) {
+      const el = document.getElementById('syncIndicator');
+      el.textContent = text;
+      el.className = `font-bold text-${color}-600`;
+    }
 
-      // ====== UI RENDER ======
-      function updateSyncStatus(text, color) {
-          const el = document.getElementById('syncStatus');
-          el.textContent = text;
-          el.className = `text-xs font-bold uppercase px-3 py-1 rounded-full bg-${color}-100 text-${color}-700 border border-${color}-300 transition-all`;
-      }
+    function sortBy(key) {
+      sortState.asc = (sortState.key === key) ? !sortState.asc : true;
+      sortState.key = key;
 
-      function render() {
-          const q = (document.getElementById("searchInput").value || "").toLowerCase();
-          const st = document.getElementById("statusFilter").value;
+      tasks.sort((a, b) => {
+        let v1 = (a[key] ?? "").toString().toLowerCase();
+        let v2 = (b[key] ?? "").toString().toLowerCase();
+        return sortState.asc ? v1.localeCompare(v2) : v2.localeCompare(v1);
+      });
 
-          const filtered = tasks.filter(t => {
-              const textMatch = (t.name + t.notes).toLowerCase().includes(q);
-              const statusMatch = st === "all" || t.status === st;
-              return textMatch && statusMatch;
-          });
+      render();
+    }
 
-          const statusStyles = {
-              "in-progress": "bg-yellow-100 text-yellow-800 border-yellow-300",
-              "pending": "bg-blue-100 text-blue-800 border-blue-300",
-              "planning": "bg-purple-100 text-purple-800 border-purple-300",
-              "completed": "bg-green-100 text-green-800 border-green-300"
-          };
+    function openEdit(id) {
+      const t = tasks.find(x => x.id === id);
+      if (!t) return;
+      editingId = id;
+      document.getElementById('editTaskName').value = t.name || '';
+      document.getElementById('editTaskNotes').value = t.notes || '';
+      toggleEditModal(true);
+    }
 
-          document.getElementById('taskRows').innerHTML = filtered.map(t => `
-              <div class="task-row px-6 py-4 grid grid-cols-1 md:grid-cols-6 gap-4 items-center bg-white ${t.priority === 'High' ? 'border-l-4 border-red-500' : 'border-l-4 border-gray-200'}">
-                  <div class="font-mono text-xs text-gray-400 font-bold">${t.id}</div>
-                  <div class="font-bold text-gray-800 text-sm">${t.name}</div>
-                  <textarea onblur="updateGitHub('${t.id}', {notes: this.value})" 
-                      class="text-sm text-gray-600 bg-transparent p-1 rounded resize-none border border-transparent hover:border-gray-200 hover:bg-gray-50 h-16 transition-all">${t.notes}</textarea>
-                  <select onchange="updateGitHub('${t.id}', {status: this.value})" 
-                      class="text-xs font-bold rounded-full px-3 py-1 ${statusStyles[t.status] || 'bg-gray-100'} border outline-none cursor-pointer appearance-none text-center">
-                      <option value="in-progress" ${t.status === 'in-progress' ? 'selected' : ''}>In Progress</option>
-                      <option value="pending" ${t.status === 'pending' ? 'selected' : ''}>Pending</option>
-                      <option value="planning" ${t.status === 'planning' ? 'selected' : ''}>Planning</option>
-                      <option value="completed" ${t.status === 'completed' ? 'selected' : ''}>Completed</option>
-                  </select>
-                  <div class="text-xs text-gray-400 italic">${t.lastTouched}</div>
-                  <div class="text-xs font-bold ${t.priority === 'High' ? 'text-red-500' : 'text-gray-500'}">${t.priority}</div>
-              </div>
-          `).join("");
-      }
+    function toggleEditModal(show) {
+      const el = document.getElementById('editOverlay');
+      if (show) el.classList.remove('hidden');
+      else el.classList.add('hidden');
+    }
 
-      // Event Listeners
-      document.getElementById("searchInput").addEventListener("input", render);
-      document.getElementById("statusFilter").addEventListener("change", render);
+    async function saveEdit() {
+      if (!editingId) return;
+      const idx = tasks.findIndex(t => t.id === editingId);
+      if (idx === -1) return;
 
-      // Iniciar
-      if (currentToken) {
-          unlockApp();
-      }
-    </script>
-  </body>
+      const name = document.getElementById('editTaskName').value.trim();
+      const notes = document.getElementById('editTaskNotes').value.trim();
+      if (!name) return alert("Title can't be empty");
+
+      tasks[idx] = { ...tasks[idx], name, notes, lastTouched: new Date().toISOString().split('T')[0] };
+
+      await sync();
+      toggleEditModal(false);
+      editingId = null;
+      render();
+      updateDashboard();
+    }
+
+    function escapeHtml(str) {
+      return String(str).replace(/[&<>"']/g, s => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+      }[s]));
+    }
+
+    document.getElementById('searchInput').addEventListener('input', () => render());
+    if (currentToken) unlockApp();
+  </script>
+</body>
 </html>

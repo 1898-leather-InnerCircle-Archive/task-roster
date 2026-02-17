@@ -1,20 +1,371 @@
 [
   {
-    "id": "TASK-001",
-    "name": "Kids Welding Gloves Sizing Research",
-    "notes": "Comprehensive sizing guide for educational programs ages 8-18",
+    "id": "DO-001",
+    "name": "Develop Welding School Acquisition Strategy (6-Month Plan)",
+    "notes": "Define 6-month acquisition plan: target list (tiered), outreach cadence, offer structure (bulk pricing + school program), KPI dashboard (leads, replies, conversions), and a weekly execution checklist. Output: 1–2 page strategy + timeline.",
+    "status": "planning",
+    "lastTouched": "2026-02-16",
+    "priority": "High",
+    "bucket": "do"
+  },
+  {
+    "id": "DO-002",
+    "name": "Prepare and Print New Batch of Insert Pages",
+    "notes": "Confirm final copy + sizing chart, choose paper stock, print quantity, and vendor. Include QR to sizing/guide page. Output: printed inserts + packed for next shipping run (with count recorded).",
+    "status": "pending",
+    "lastTouched": "2026-02-16",
+    "priority": "High",
+    "bucket": "do"
+  },
+  {
+    "id": "DO-003",
+    "name": "Review and Update Glove Insert Brochure",
+    "notes": "Audit current brochure: branding, product benefits, care instructions, warranty/returns note, and CTA. Update visuals + QR code links. Output: final PDF ready for print and GitHub/Drive upload.",
+    "status": "pending",
+    "lastTouched": "2026-02-16",
+    "priority": "High",
+    "bucket": "do"
+  },
+  {
+    "id": "DO-004",
+    "name": "Get to a stock order amount, share it here (1898 talks)",
+    "notes": "Calculate next order quantity using current inventory, forecasted sales, lead times (gloves/boxes), and safety buffer. Output: recommended order qty by size/model + cost estimate to share in 1898 talks.",
+    "status": "pending",
+    "lastTouched": "2026-02-16",
+    "priority": "High",
+    "bucket": "do"
+  },
+  {
+    "id": "DO-005",
+    "name": "Inventory & timeline (log sticker count; gloves ~10 days, boxes ~20 days)",
+    "notes": "Create quick inventory log: stickers count, gloves on hand by size, boxes on hand, and ETA trackers (gloves ~10d, boxes ~20d). Output: single source of truth + update cadence (daily/2x weekly).",
     "status": "in-progress",
     "lastTouched": "2026-02-17",
     "priority": "High",
     "bucket": "do"
   },
   {
-    "id": "TASK-008",
-    "name": "Interactividad del Task Management",
-    "notes": "Implementar funciones CRUD y API de GitHub",
+    "id": "DO-006",
+    "name": "Weston’s Care Package (send discount code + larger replacement gloves Size 10+)",
+    "notes": "Generate unique discount code, pack replacement gloves (Size 10+), include thank-you note + request for feedback/photos. Output: shipped package + tracking saved in notes/CRM.",
+    "status": "pending",
+    "lastTouched": "2026-02-16",
+    "priority": "High",
+    "bucket": "do"
+  },
+  {
+    "id": "DO-007",
+    "name": "Evaluate 28-pair Stanton V2 samples → decide on 150-pair production run",
+    "notes": "Review V2 sample set: fit, stitching, heat resistance, cuff comfort, defects rate, and tester feedback. Decide go/no-go for 150-pair run. Output: decision + list of required tweaks sent to maker.",
     "status": "in-progress",
     "lastTouched": "2026-02-17",
     "priority": "High",
     "bucket": "do"
+  },
+  {
+    "id": "DO-008",
+    "name": "Ship heavy-duty blue gloves to Brent Bailey Forge for testing/feedback",
+    "notes": "Prepare tester package with gloves + feedback checklist (fit, dexterity, durability, heat). Include return/replace instructions and request short video review. Output: shipped + follow-up date scheduled.",
+    "status": "pending",
+    "lastTouched": "2026-02-16",
+    "priority": "High",
+    "bucket": "do"
+  },
+  {
+    "id": "DO-009",
+    "name": "Send large-sized gloves to Victor (artist) for bone design illustration",
+    "notes": "Send large glove sample + references for bone design placement and style guidelines. Confirm deliverables (vector + mockup). Output: shipped sample + design timeline agreed.",
+    "status": "pending",
+    "lastTouched": "2026-02-16",
+    "priority": "High",
+    "bucket": "do"
+  },
+  {
+    "id": "DO-010",
+    "name": "Order from Spike (China) 3x5 vinyl banners w/ grommets",
+    "notes": "Finalize banner design, confirm vinyl quality, grommet placement, quantity, shipping method, and ETA. Output: PO placed + proof approved + tracking stored.",
+    "status": "planning",
+    "lastTouched": "2026-02-16",
+    "priority": "High",
+    "bucket": "do"
+  },
+  {
+    "id": "DO-011",
+    "name": "Benchmarking & Apron Procurement: Calavera Toolworks vs. Sage Customs",
+    "notes": "Compare aprons on materials, FR performance, comfort, lead time, wholesale pricing, and branding options. Output: recommendation + sample purchase (if needed) + final supplier decision.",
+    "status": "in-progress",
+    "lastTouched": "2026-02-16",
+    "priority": "High",
+    "bucket": "do"
+  },
+  {
+    "id": "DO-012",
+    "name": "Get a banner to Caleb Welder 1898",
+    "notes": "Deliver banner + brief usage instructions (photos/video ask). Confirm address and event timing. Output: banner delivered + request 3 photos + 1 short clip for socials.",
+    "status": "pending",
+    "lastTouched": "2026-02-16",
+    "priority": "High",
+    "bucket": "do"
+  },
+  {
+    "id": "DO-013",
+    "name": "Get Paul all the costs",
+    "notes": "Compile cost breakdown: gloves COGS, packaging, shipping, inserts, stickers, banners, samples, and tooling. Output: simple cost sheet + margin ranges by channel (DTC/wholesale).",
+    "status": "pending",
+    "lastTouched": "2026-02-16",
+    "priority": "High",
+    "bucket": "do"
+  },
+  {
+    "id": "DO-014",
+    "name": "Send Updated Straps and Smaller Gloves (waist strap, reinforced strap, latest straps, smaller gloves for students)",
+    "notes": "Prepare package with updated strap set + smaller student gloves. Include change log of improvements and feedback checklist. Output: shipped + follow-up reminder to collect feedback.",
+    "status": "planning",
+    "lastTouched": "2026-02-16",
+    "priority": "High",
+    "bucket": "do"
+  },
+  {
+    "id": "TASK-001",
+    "name": "Kids Welding Gloves Sizing Research",
+    "notes": "Collect sizing data (hand width/length) across ages 8–18, map to glove sizes, define size chart and fit guidance. Output: final sizing table + recommendations for prototype dimensions.",
+    "status": "in-progress",
+    "lastTouched": "2026-02-16",
+    "priority": "High",
+    "bucket": "do"
+  },
+  {
+    "id": "TASK-002",
+    "name": "Welding School Outreach Campaign",
+    "notes": "Build outreach list (5+ schools), craft email/DM templates, define offer (school pricing + samples), and track replies. Output: outreach sent to first batch + follow-up schedule.",
+    "status": "in-progress",
+    "lastTouched": "2026-02-15",
+    "priority": "High",
+    "bucket": "do"
+  },
+  {
+    "id": "TASK-008",
+    "name": "Interactividad del Task Management",
+    "notes": "Implement CRUD completo (crear/editar/borrar), sync estable con GitHub API, manejo de UTF-8 (•, →, ’), y logs de errores. Output: app funcional + tasks.json consistente.",
+    "status": "in-progress",
+    "lastTouched": "2026-02-16",
+    "priority": "High",
+    "bucket": "do"
+  },
+  {
+    "id": "TASK-003",
+    "name": "Website Task Management Page",
+    "notes": "Polish UI: sorting, filters, responsive table, note wrapping, and edit modal. Output: production-ready GitHub Pages page reading/writing tasks.json.",
+    "status": "in-progress",
+    "lastTouched": "2026-02-15",
+    "priority": "Medium",
+    "bucket": "do"
+  },
+  {
+    "id": "SCH-001",
+    "name": "Write blog info: wholesale bearings (brand differences, general info, etc.)",
+    "notes": "Draft blog outline, compare brands, explain use cases and buying tips. Include FAQ + internal links. Output: 1 long-form post ready for review/publish.",
+    "status": "planning",
+    "lastTouched": "2026-02-16",
+    "priority": "Medium",
+    "bucket": "schedule"
+  },
+  {
+    "id": "SCH-002",
+    "name": "Record high-quality product video",
+    "notes": "Create shot list: close-ups, fit demo, durability/heat use case, and testimonials. Record + edit with captions. Output: 30–60s hero video + 3 short clips.",
+    "status": "planning",
+    "lastTouched": "2026-02-16",
+    "priority": "Medium",
+    "bucket": "schedule"
+  },
+  {
+    "id": "SCH-003",
+    "name": "Buy some FR shirts from Benchmark FR",
+    "notes": "Pick sizes, order 1–2 options, test comfort/fit with apron use. Output: recommendation on whether to stock/partner or keep for internal use.",
+    "status": "pending",
+    "lastTouched": "2026-02-16",
+    "priority": "Medium",
+    "bucket": "schedule"
+  },
+  {
+    "id": "SCH-004",
+    "name": "Rotating display case / find continuous-spin turntable for 1898 welding gloves",
+    "notes": "Find a continuous spin turntable, evaluate size/weight capacity and display aesthetics. Output: product selection + purchase + display mock setup.",
+    "status": "planning",
+    "lastTouched": "2026-02-16",
+    "priority": "Medium",
+    "bucket": "schedule"
+  },
+  {
+    "id": "SCH-005",
+    "name": "Send Paul + glove maker latest prototype photos & technical specs to finalize next production run",
+    "notes": "Take high-res photos + annotate changes, compile specs (materials, stitching, cuff, sizing). Output: email package to Paul + maker with clear revision list + approval ask.",
+    "status": "pending",
+    "lastTouched": "2026-02-16",
+    "priority": "Medium",
+    "bucket": "schedule"
+  },
+  {
+    "id": "SCH-006",
+    "name": "Remove side metal D-ring + widen gauntlet cuffs (heavy jackets comfort)",
+    "notes": "Prototype change: remove D-ring, widen cuff for jacket comfort; test mobility + safety. Output: revised pattern notes + decision to implement in next run.",
+    "status": "planning",
+    "lastTouched": "2026-02-16",
+    "priority": "Medium",
+    "bucket": "schedule"
+  },
+  {
+    "id": "SCH-007",
+    "name": "Redesign back/waist straps (alligator clips or cross-back) so apron removable with helmet on",
+    "notes": "Evaluate clip vs cross-back designs; focus on quick release + comfort. Output: chosen strap system + prototype request to maker.",
+    "status": "planning",
+    "lastTouched": "2026-02-16",
+    "priority": "Medium",
+    "bucket": "schedule"
+  },
+  {
+    "id": "SCH-008",
+    "name": "Design + implement personalized Thank You cards",
+    "notes": "Create card template (brand, handwritten space, QR to review). Decide printing method. Output: final design + print order + insertion process.",
+    "status": "planning",
+    "lastTouched": "2026-02-16",
+    "priority": "Medium",
+    "bucket": "schedule"
+  },
+  {
+    "id": "SCH-009",
+    "name": "Order new custom stickers (Merakai Metal Works)",
+    "notes": "Confirm sticker design, size, finish (matte/gloss), quantity, and vendor proof. Output: order placed + ETA tracked + count logged on arrival.",
+    "status": "pending",
+    "lastTouched": "2026-02-16",
+    "priority": "Medium",
+    "bucket": "schedule"
+  },
+  {
+    "id": "SCH-010",
+    "name": "When XL sizes available: offer free with 100% discount coupon (@bigmikecustomsteel, @bryson.ward)",
+    "notes": "Prepare coupon codes + shipping workflow. Once XL arrives, contact handles and ship with feedback request. Output: 2 shipments completed + content captured.",
+    "status": "planning",
+    "lastTouched": "2026-02-16",
+    "priority": "Medium",
+    "bucket": "schedule"
+  },
+  {
+    "id": "SCH-011",
+    "name": "Let Carrie Lawhorn know when large gloves are ready",
+    "notes": "Send update message when inventory is ready; offer reserved pair and preferred shipping. Output: confirmation + shipment scheduled.",
+    "status": "pending",
+    "lastTouched": "2026-02-16",
+    "priority": "Medium",
+    "bucket": "schedule"
+  },
+  {
+    "id": "SCH-012",
+    "name": "When gloves arrive: send @cslacticitysteel coupon (apron $100 off + free gloves pair)",
+    "notes": "Create coupon (apron $100 off + free gloves), confirm shipping info, and request post/pics. Output: coupon delivered + redemption tracked.",
+    "status": "planning",
+    "lastTouched": "2026-02-16",
+    "priority": "Medium",
+    "bucket": "schedule"
+  },
+  {
+    "id": "SCH-013",
+    "name": "Glove boxes will arrive in 20 days",
+    "notes": "Track box shipment ETA, confirm count/specs, prep packing station. Output: receiving checklist + storage plan + packaging timeline.",
+    "status": "planning",
+    "lastTouched": "2026-02-16",
+    "priority": "Medium",
+    "bucket": "schedule"
+  },
+  {
+    "id": "TASK-005",
+    "name": "Kids Gloves Prototype Development",
+    "notes": "Turn sizing research into patterns: sample build, fit testing with students, collect feedback, iterate. Output: approved prototype specs for production quote.",
+    "status": "planning",
+    "lastTouched": "2026-02-15",
+    "priority": "Medium",
+    "bucket": "schedule"
+  },
+  {
+    "id": "TASK-004",
+    "name": "Product Roster Title Update",
+    "notes": "Update site title/branding to '1898 Leather', verify favicon/header text, and deploy. Output: live page updated + quick QA checklist passed.",
+    "status": "pending",
+    "lastTouched": "2026-02-13",
+    "priority": "Low",
+    "bucket": "schedule"
+  },
+  {
+    "id": "DEL-001",
+    "name": "Research availability/sourcing of ring-spun FR cotton + aramid fabric",
+    "notes": "Identify suppliers for ring-spun FR cotton + aramid blends, request swatches/pricing, note MOQ and lead times. Output: vendor shortlist + recommendation.",
+    "status": "planning",
+    "lastTouched": "2026-02-16",
+    "priority": "Low",
+    "bucket": "delegate"
+  },
+  {
+    "id": "DEL-002",
+    "name": "Consider finding a rep agency to sell 1898 products to other stores",
+    "notes": "Find 3–5 rep agencies with welding/industrial footprint; compare terms, territories, and commission. Output: shortlist + outreach email draft.",
+    "status": "planning",
+    "lastTouched": "2026-02-16",
+    "priority": "Low",
+    "bucket": "delegate"
+  },
+  {
+    "id": "DEL-003",
+    "name": "Move feedback group chat WhatsApp → Instagram (include testers who avoid WhatsApp spam)",
+    "notes": "Plan migration: list members, create IG group(s), set rules/pinning, and move key resources. Output: IG group live + WhatsApp sunset message.",
+    "status": "planning",
+    "lastTouched": "2026-02-16",
+    "priority": "Low",
+    "bucket": "delegate"
+  },
+  {
+    "id": "DEL-004",
+    "name": "Develop ladies size for gloves",
+    "notes": "Collect sizing/fit feedback for women’s sizing, define new size chart, and prototype pattern changes. Output: proposed ladies fit spec + sample request.",
+    "status": "planning",
+    "lastTouched": "2026-02-16",
+    "priority": "Low",
+    "bucket": "delegate"
+  },
+  {
+    "id": "DEL-005",
+    "name": "Develop Heavy-Duty Blacksmith Gloves",
+    "notes": "Research materials and reinforcement zones for blacksmith use, gather competitor benchmarks, draft spec sheet. Output: product concept + prototype plan.",
+    "status": "planning",
+    "lastTouched": "2026-02-16",
+    "priority": "Low",
+    "bucket": "delegate"
+  },
+  {
+    "id": "DEL-006",
+    "name": "Design Firefighter Gloves",
+    "notes": "Assess firefighter requirements (FR standards, grip, dexterity), identify certification constraints, draft initial concept. Output: feasibility summary + next steps.",
+    "status": "planning",
+    "lastTouched": "2026-02-16",
+    "priority": "Low",
+    "bucket": "delegate"
+  },
+  {
+    "id": "DEL-007",
+    "name": "Design welding sleeves",
+    "notes": "Define sleeve materials and size range, check sourcing/MOQ, and prototype attachment method. Output: spec + sample request list.",
+    "status": "planning",
+    "lastTouched": "2026-02-16",
+    "priority": "Low",
+    "bucket": "delegate"
+  },
+  {
+    "id": "DEL-008",
+    "name": "Research heat-resistant rubber or metal-clip solutions for thumb/index finger area",
+    "notes": "Explore protective overlays/clips for thumb/index hot spots; test adhesion/comfort and durability. Output: 2–3 solution candidates + cost impact estimate.",
+    "status": "planning",
+    "lastTouched": "2026-02-16",
+    "priority": "Low",
+    "bucket": "delegate"
   }
 ]
