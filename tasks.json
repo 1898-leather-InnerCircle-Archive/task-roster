@@ -1,0 +1,20 @@
+[
+  {
+    "id": "TASK-001",
+    "name": "Kids Welding Gloves Sizing Research",
+    "notes": "Comprehensive sizing guide for educational programs ages 8-18",
+    "status": "in-progress",
+    "lastTouched": "2026-02-16",
+    "priority": "High",
+    "bucket": "do"
+  },
+  {
+    "id": "TASK-008",
+    "name": "Interactividad del Task Management",
+    "notes": "Implementar funciones CRUD y API de GitHub",
+    "status": "in-progress",
+    "lastTouched": "2026-02-16",
+    "priority": "High",
+    "bucket": "do"
+  }
+]
