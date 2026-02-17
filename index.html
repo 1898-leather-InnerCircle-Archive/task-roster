@@ -4,354 +4,247 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>1898 Leather - Task Management System</title>
-    <link
-      href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
-      rel="stylesheet"
-    />
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
     <style>
-      .priority-high {
-        border-left: 4px solid #ef4444;
-      }
-      .priority-medium {
-        border-left: 4px solid #f59e0b;
-      }
-      .priority-low {
-        border-left: 4px solid #10b981;
-      }
-      .task-row {
-        border-bottom: 1px solid #e5e7eb;
-      }
-      .task-row:hover {
-        background-color: #f9fafb;
-      }
-      .header-row {
-        background-color: #f3f4f6;
-        font-weight: 600;
-      }
-      .pill {
-        display: inline-flex;
-        align-items: center;
-        padding: 0.125rem 0.625rem;
-        border-radius: 9999px;
-        font-size: 0.75rem;
-        font-weight: 600;
-      }
-      .pill-inprogress {
-        background: #fef3c7;
-        color: #92400e;
-      }
-      .pill-pending {
-        background: #dbeafe;
-        color: #1e40af;
-      }
-      .pill-planning {
-        background: #e0e7ff;
-        color: #3730a3;
-      }
-      .pill-completed {
-        background: #d1fae5;
-        color: #065f46;
-      }
-      .pill-do {
-        background: #fee2e2;
-        color: #991b1b;
-      }
-      .pill-schedule {
-        background: #e0f2fe;
-        color: #075985;
-      }
-      .pill-delegate {
-        background: #fef9c3;
-        color: #854d0e;
-      }
-      .tab-active {
-        background: #111827;
-        color: #fff;
-      }
+      .task-row { border-bottom: 1px solid #e5e7eb; transition: all 0.2s; }
+      .task-row:hover { background-color: #f9fafb; }
+      .header-row { background-color: #f3f4f6; font-weight: 600; }
+      textarea:focus { outline: none; background: white; box-shadow: 0 0 0 2px #bfdbfe; }
+      #loginOverlay { backdrop-filter: blur(8px); }
     </style>
   </head>
 
-  <body class="bg-gray-50 min-h-screen">
-    <div class="container mx-auto px-4 py-8 max-w-7xl">
-      <!-- Header -->
-      <div class="bg-white rounded-lg shadow-lg p-6 mb-8">
-        <div class="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
-          <div>
-            <h1 class="text-3xl font-bold text-gray-900">1898 Leather</h1>
-            <h2 class="text-xl text-gray-600">Task Management System</h2>
-            <p id="lastUpdated" class="text-gray-500 mt-2"></p>
-          </div>
+  <body class="bg-gray-50 min-h-screen relative">
+    
+    <div id="loginOverlay" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 transition-opacity duration-500">
+      <div class="bg-white p-8 rounded-xl shadow-2xl max-w-md w-full mx-4 border-t-8 border-blue-600">
+        <h2 class="text-2xl font-bold text-gray-900 mb-2 text-center">Security Access</h2>
+        <p class="text-gray-500 text-center mb-6 text-sm">Please enter your GitHub Personal Access Token to manage 1898 Leather tasks.</p>
+        <input type="password" id="tokenInput" placeholder="ghp_xxxxxxxxxxxx" class="w-full border border-gray-300 rounded-lg px-4 py-3 mb-4 focus:ring-2 focus:ring-blue-500 outline-none transition-all" />
+        <button onclick="saveTokenAndLoad()" class="w-full bg-blue-600 text-white font-bold py-3 rounded-lg hover:bg-blue-700 shadow-lg transition-colors">
+          Unlock System
+        </button>
+      </div>
+    </div>
 
-          <div class="text-right">
-            <div id="totalTasks" class="text-2xl font-bold text-blue-600">0</div>
-            <div class="text-sm text-gray-500">Total Tasks</div>
-          </div>
+    <div id="mainContent" class="container mx-auto px-4 py-8 max-w-7xl opacity-20 transition-opacity duration-1000">
+      <div class="bg-white rounded-lg shadow-lg p-6 mb-8 border-b-4 border-blue-600 flex flex-col md:flex-row justify-between items-center gap-4">
+        <div>
+          <h1 class="text-3xl font-bold text-gray-900">1898 Leather</h1>
+          <h2 class="text-xl text-gray-600 italic">Task Management System</h2>
+        </div>
+        <div class="flex items-center gap-4">
+          <button onclick="addNewTask()" class="bg-blue-600 text-white px-4 py-2 rounded-lg font-bold text-sm hover:bg-blue-700 shadow transition-all">+ Add New Task</button>
+          <span id="syncStatus" class="text-xs font-bold uppercase px-3 py-1 rounded-full bg-gray-100 text-gray-500 italic border border-gray-200">Waiting...</span>
         </div>
       </div>
 
-      <!-- Controls -->
-      <div class="bg-white rounded-lg shadow p-6 mb-8">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
-          <div>
-            <label class="block text-xs uppercase tracking-widest text-gray-500" for="searchInput"
-              >Search</label
-            >
-            <input
-              id="searchInput"
-              type="search"
-              placeholder="Search by task name or notes"
-              class="mt-2 w-full rounded border border-gray-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-200"
-            />
-          </div>
-
-          <div>
-            <label class="block text-xs uppercase tracking-widest text-gray-500" for="statusFilter"
-              >Status</label
-            >
-            <select
-              id="statusFilter"
-              class="mt-2 w-full rounded border border-gray-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-200"
-            >
-              <option value="all">All Status</option>
-              <option value="in-progress">In Progress</option>
-              <option value="pending">Pending</option>
-              <option value="planning">Planning</option>
-              <option value="completed">Completed</option>
-            </select>
-          </div>
-
-          <div>
-            <label class="block text-xs uppercase tracking-widest text-gray-500">View</label>
-            <div class="mt-2 flex flex-wrap gap-2">
-              <button data-tab="all" class="tab tab-active px-4 py-2 rounded border border-gray-200 text-sm">
-                All
-              </button>
-              <button data-tab="do" class="tab px-4 py-2 rounded border border-gray-200 text-sm">
-                Do
-              </button>
-              <button data-tab="schedule" class="tab px-4 py-2 rounded border border-gray-200 text-sm">
-                Schedule
-              </button>
-              <button data-tab="delegate" class="tab px-4 py-2 rounded border border-gray-200 text-sm">
-                Delegate
-              </button>
-            </div>
-          </div>
+      <div class="bg-white rounded-lg shadow p-6 mb-8 grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-xs uppercase tracking-widest text-gray-500 font-bold">Search Tasks</label>
+          <input id="searchInput" type="search" placeholder="Filter by name or notes..." class="mt-2 w-full rounded border border-gray-200 px-4 py-2 text-sm focus:ring-2 focus:ring-blue-200 outline-none transition-all" />
+        </div>
+        <div>
+          <label class="block text-xs uppercase tracking-widest text-gray-500 font-bold">Status Filter</label>
+          <select id="statusFilter" class="mt-2 w-full rounded border border-gray-200 px-4 py-2 text-sm outline-none cursor-pointer">
+            <option value="all">All Status</option>
+            <option value="in-progress">In Progress</option>
+            <option value="pending">Pending</option>
+            <option value="planning">Planning</option>
+            <option value="completed">Completed</option>
+          </select>
         </div>
       </div>
 
-      <!-- Statistics Cards -->
-      <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-        <div class="bg-white rounded-lg shadow p-6">
-          <div id="activeTasks" class="text-2xl font-bold text-blue-600">0</div>
-          <div class="text-sm text-gray-500">Active Tasks</div>
-        </div>
-        <div class="bg-white rounded-lg shadow p-6">
-          <div id="completedTasks" class="text-2xl font-bold text-green-600">0</div>
-          <div class="text-sm text-gray-500">Completed</div>
-        </div>
-        <div class="bg-white rounded-lg shadow p-6">
-          <div id="inProgressTasks" class="text-2xl font-bold text-yellow-600">0</div>
-          <div class="text-sm text-gray-500">In Progress</div>
-        </div>
-        <div class="bg-white rounded-lg shadow p-6">
-          <div id="highPriorityTasks" class="text-2xl font-bold text-red-600">0</div>
-          <div class="text-sm text-gray-500">High Priority</div>
-        </div>
-      </div>
-
-      <!-- Task List -->
-      <div class="bg-white rounded-lg shadow mb-8 overflow-hidden">
-        <div class="px-6 py-4 border-b border-gray-200">
-          <h3 class="text-lg font-semibold text-gray-900">
-            All Tasks - ID, Task Name, Notes, Status, Last Touched, Priority
-          </h3>
-        </div>
-
-        <!-- Header Row -->
-        <div class="header-row px-6 py-3 grid grid-cols-1 md:grid-cols-6 gap-4 text-sm text-gray-700">
+      <div class="bg-white rounded-lg shadow overflow-hidden">
+        <div class="header-row px-6 py-3 grid grid-cols-1 md:grid-cols-6 gap-4 text-xs uppercase tracking-wider text-gray-600 border-b">
           <div>ID</div>
           <div>Task Name</div>
           <div>Notes</div>
           <div>Status</div>
-          <div>Last Touched</div>
+          <div>Updated</div>
           <div>Priority</div>
         </div>
-
-        <!-- Rows -->
-        <div id="taskRows" class="divide-y divide-gray-200"></div>
-      </div>
-
-      <!-- Quick Actions -->
-      <div class="bg-white rounded-lg shadow p-6 mb-8">
-        <h3 class="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <a
-            href="https://docs.google.com/document/d/1N7C72MFkBzT85DW7q1VvpTcXCCTE_pnoXVDoZIIcehk/edit"
-            target="_blank"
-            class="flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-          >
-            📋 Welding Schools Database
-          </a>
-          <a
-            href="https://1898-leather-innercircle-archive.github.io/1898-product-roster/"
-            target="_blank"
-            class="flex items-center justify-center px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
-          >
-            🌐 Product Roster
-          </a>
-          <a
-            href="https://docs.google.com/document/d/1N7C72MFkBzT85DW7q1VvpTcXCCTE_pnoXVDoZIIcehk/edit"
-            target="_blank"
-            class="flex items-center justify-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
-          >
-            📏 Sizing Guide
-          </a>
-        </div>
-      </div>
-
-      <!-- Footer -->
-      <div class="mt-8 text-center text-gray-500 text-sm">
-        <p id="footerUpdated"></p>
-        <p class="mt-1">
-          Tip: Static GitHub Pages updates require commit/push. For near real-time, fetch data from Google Sheets.
-        </p>
+        <div id="taskRows" class="divide-y divide-gray-200 italic text-gray-400"></div>
       </div>
     </div>
 
     <script>
-        // ====== CONFIG DE CONEXIÓN ======
-const GITHUB_CONFIG = {
-    owner: 'tu-usuario-de-github', // CAMBIA ESTO
-    repo: '1898-leather-innercircle-archive',
-    path: 'tasks.json'
-};
+      const GITHUB_CONFIG = {
+          owner: '1898-leather-InnerCircle-Archive',
+          repo: 'task-roster', // Verifica si el repo se llama solo 'task-roster' o '1898-leather-InnerCircle-Archive/task-roster'
+          path: 'tasks.json'
+      };
 
-// Pedir token si no existe en la sesión actual
-if (!sessionStorage.getItem('gh_token')) {
-    const token = prompt("Introduce tu GitHub Personal Access Token para habilitar la edición:");
-    if (token) sessionStorage.setItem('gh_token', token);
-}
+      let tasks = [];
+      let currentToken = sessionStorage.getItem('gh_token');
 
-let tasks = []; // Se llenará desde GitHub
+      // ====== MANEJO DE ACCESO ======
+      function saveTokenAndLoad() {
+          const input = document.getElementById('tokenInput');
+          if (input.value.trim().length > 10) {
+              sessionStorage.setItem('gh_token', input.value.trim());
+              currentToken = input.value.trim();
+              unlockApp();
+          } else {
+              alert("Please enter a valid token.");
+          }
+      }
 
-// ====== FUNCIONES DE API ======
+      function unlockApp() {
+          document.getElementById('loginOverlay').classList.add('hidden');
+          document.getElementById('mainContent').classList.remove('opacity-20');
+          loadTasks();
+      }
 
-// 1. Cargar tareas desde GitHub
-async function loadTasks() {
-    try {
-        const resp = await fetch(`https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/contents/${GITHUB_CONFIG.path}`);
-        const data = await resp.json();
-        // GitHub devuelve el contenido en Base64, hay que decodificarlo
-        tasks = JSON.parse(atob(data.content));
-        render();
-    } catch (e) {
-        console.error("Error cargando tareas:", e);
-    }
-}
+      // ====== OPERACIONES DE API ======
+      async function loadTasks() {
+          updateSyncStatus('Syncing...', 'yellow');
+          try {
+              const resp = await fetch(`https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/contents/${GITHUB_CONFIG.path}?t=${new Date().getTime()}`, {
+                  headers: { 'Authorization': `token ${currentToken}` }
+              });
+              
+              if (!resp.ok) throw new Error('Token inválido o error de repo');
+              
+              const data = await resp.json();
+              tasks = JSON.parse(atob(data.content));
+              render();
+              updateSyncStatus('Synced', 'green');
+          } catch (e) {
+              console.error(e);
+              updateSyncStatus('Auth Error', 'red');
+              sessionStorage.removeItem('gh_token');
+              alert("Failed to access GitHub. Please check your token and repository name.");
+              location.reload();
+          }
+      }
 
-// 2. Guardar cambios en GitHub (UPDATE)
-async function updateGitHub(taskId, updatedFields) {
-    const token = sessionStorage.getItem('gh_token');
-    if (!token) return alert("Token requerido para guardar.");
+      async function updateGitHub(taskId, updatedFields) {
+          updateSyncStatus('Saving...', 'yellow');
+          try {
+              const fileResp = await fetch(`https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/contents/${GITHUB_CONFIG.path}`, {
+                  headers: { 'Authorization': `token ${currentToken}` }
+              });
+              const fileData = await fileResp.json();
+              
+              const index = tasks.findIndex(t => t.id === taskId);
+              tasks[index] = { 
+                ...tasks[index], 
+                ...updatedFields, 
+                lastTouched: new Date().toISOString().split('T')[0] 
+              };
 
-    try {
-        // Obtener el SHA del archivo (GitHub lo pide para validar cambios)
-        const fileResp = await fetch(`https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/contents/${GITHUB_CONFIG.path}`);
-        const fileData = await fileResp.json();
-        const sha = fileData.sha;
+              const updateResp = await fetch(`https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/contents/${GITHUB_CONFIG.path}`, {
+                  method: 'PUT',
+                  headers: {
+                      'Authorization': `token ${currentToken}`,
+                      'Content-Type': 'application/json'
+                  },
+                  body: JSON.stringify({
+                      message: `Task Update: ${taskId}`,
+                      content: btoa(unescape(encodeURIComponent(JSON.stringify(tasks, null, 2)))),
+                      sha: fileData.sha
+                  })
+              });
 
-        // Actualizar el array local
-        const index = tasks.findIndex(t => t.id === taskId);
-        tasks[index] = { ...tasks[index], ...updatedFields, lastTouched: new Date().toISOString().split('T')[0] };
+              if (updateResp.ok) {
+                  updateSyncStatus('Saved', 'green');
+                  render();
+              }
+          } catch (e) {
+              updateSyncStatus('Error', 'red');
+              alert("Connection lost. Check your internet or token.");
+          }
+      }
 
-        // Enviar a GitHub
-        const updateResp = await fetch(`https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/contents/${GITHUB_CONFIG.path}`, {
-            method: 'PUT',
-            headers: {
-                'Authorization': `token ${token}`,
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                message: `Update task ${taskId}`,
-                content: btoa(JSON.stringify(tasks, null, 2)), // Codificar a Base64
-                sha: sha
-            })
-        });
+      async function addNewTask() {
+          const name = prompt("Enter new task name:");
+          if (!name) return;
+          
+          const newTask = {
+              id: `TASK-${Math.floor(Math.random() * 900) + 100}`,
+              name: name,
+              notes: "Write details here...",
+              status: "pending",
+              lastTouched: new Date().toISOString().split('T')[0],
+              priority: "Medium"
+          };
+          
+          tasks.unshift(newTask);
+          updateSyncStatus('Adding...', 'yellow');
+          
+          // Reutilizamos la lógica de PUT para subir todo el array actualizado
+          const fileResp = await fetch(`https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/contents/${GITHUB_CONFIG.path}`, {
+              headers: { 'Authorization': `token ${currentToken}` }
+          });
+          const fileData = await fileResp.json();
+          
+          await fetch(`https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/contents/${GITHUB_CONFIG.path}`, {
+              method: 'PUT',
+              headers: { 'Authorization': `token ${currentToken}`, 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                  message: `New Task: ${newTask.id}`,
+                  content: btoa(unescape(encodeURIComponent(JSON.stringify(tasks, null, 2)))),
+                  sha: fileData.sha
+              })
+          });
+          
+          updateSyncStatus('Saved', 'green');
+          render();
+      }
 
-        if (updateResp.ok) {
-            console.log("Guardado en GitHub correctamente");
-            render(); // Refrescar UI y stats
-        } else {
-            alert("Error al guardar. Revisa tu Token.");
-        }
-    } catch (e) {
-        console.error("Error en la conexión:", e);
-    }
-}
+      // ====== UI RENDER ======
+      function updateSyncStatus(text, color) {
+          const el = document.getElementById('syncStatus');
+          el.textContent = text;
+          el.className = `text-xs font-bold uppercase px-3 py-1 rounded-full bg-${color}-100 text-${color}-700 border border-${color}-300 transition-all`;
+      }
 
-// ====== UI HELPERS (Tus funciones originales mejoradas) ======
-const statusPill = (status) => {
-    const map = {
-        "in-progress": { cls: "bg-yellow-100 text-yellow-800", label: "In Progress" },
-        pending: { cls: "bg-blue-100 text-blue-800", label: "Pending" },
-        planning: { cls: "bg-indigo-100 text-indigo-800", label: "Planning" },
-        completed: { cls: "bg-green-100 text-green-800", label: "Completed" },
-    };
-    return map[status] || map.pending;
-};
+      function render() {
+          const q = (document.getElementById("searchInput").value || "").toLowerCase();
+          const st = document.getElementById("statusFilter").value;
 
-const priorityClass = (p) => {
-    if (p === "High") return "border-l-4 border-red-500";
-    if (p === "Medium") return "border-l-4 border-yellow-500";
-    return "border-l-4 border-green-500";
-};
+          const filtered = tasks.filter(t => {
+              const textMatch = (t.name + t.notes).toLowerCase().includes(q);
+              const statusMatch = st === "all" || t.status === st;
+              return textMatch && statusMatch;
+          });
 
-// ====== RENDER & FILTERS ======
-const els = {
-    rows: document.getElementById("taskRows"),
-    search: document.getElementById("searchInput"),
-    status: document.getElementById("statusFilter")
-};
+          const statusStyles = {
+              "in-progress": "bg-yellow-100 text-yellow-800 border-yellow-300",
+              "pending": "bg-blue-100 text-blue-800 border-blue-300",
+              "planning": "bg-purple-100 text-purple-800 border-purple-300",
+              "completed": "bg-green-100 text-green-800 border-green-300"
+          };
 
-function render() {
-    const q = (els.search.value || "").toLowerCase();
-    const st = els.status.value;
+          document.getElementById('taskRows').innerHTML = filtered.map(t => `
+              <div class="task-row px-6 py-4 grid grid-cols-1 md:grid-cols-6 gap-4 items-center bg-white ${t.priority === 'High' ? 'border-l-4 border-red-500' : 'border-l-4 border-gray-200'}">
+                  <div class="font-mono text-xs text-gray-400 font-bold">${t.id}</div>
+                  <div class="font-bold text-gray-800 text-sm">${t.name}</div>
+                  <textarea onblur="updateGitHub('${t.id}', {notes: this.value})" 
+                      class="text-sm text-gray-600 bg-transparent p-1 rounded resize-none border border-transparent hover:border-gray-200 hover:bg-gray-50 h-16 transition-all">${t.notes}</textarea>
+                  <select onchange="updateGitHub('${t.id}', {status: this.value})" 
+                      class="text-xs font-bold rounded-full px-3 py-1 ${statusStyles[t.status] || 'bg-gray-100'} border outline-none cursor-pointer appearance-none text-center">
+                      <option value="in-progress" ${t.status === 'in-progress' ? 'selected' : ''}>In Progress</option>
+                      <option value="pending" ${t.status === 'pending' ? 'selected' : ''}>Pending</option>
+                      <option value="planning" ${t.status === 'planning' ? 'selected' : ''}>Planning</option>
+                      <option value="completed" ${t.status === 'completed' ? 'selected' : ''}>Completed</option>
+                  </select>
+                  <div class="text-xs text-gray-400 italic">${t.lastTouched}</div>
+                  <div class="text-xs font-bold ${t.priority === 'High' ? 'text-red-500' : 'text-gray-500'}">${t.priority}</div>
+              </div>
+          `).join("");
+      }
 
-    const filtered = tasks.filter(t => {
-        const textMatch = (t.name + t.notes).toLowerCase().includes(q);
-        const statusMatch = st === "all" || t.status === st;
-        return textMatch && statusMatch;
-    });
+      // Event Listeners
+      document.getElementById("searchInput").addEventListener("input", render);
+      document.getElementById("statusFilter").addEventListener("change", render);
 
-    els.rows.innerHTML = filtered.map(t => `
-        <div class="task-row px-6 py-4 grid grid-cols-1 md:grid-cols-6 gap-4 items-center bg-white border-b ${priorityClass(t.priority)}">
-            <div class="font-mono text-xs text-gray-400">${t.id}</div>
-            <div class="font-bold text-gray-800">${t.name}</div>
-            
-            <textarea onblur="updateGitHub('${t.id}', {notes: this.value})" 
-                class="text-sm text-gray-600 bg-transparent hover:bg-gray-50 border-none p-1 rounded resize-none focus:ring-1 focus:ring-blue-300">${t.notes}</textarea>
-            
-            <select onchange="updateGitHub('${t.id}', {status: this.value})" 
-                class="text-xs font-bold rounded-full px-2 py-1 ${statusPill(t.status).cls} border-none outline-none">
-                <option value="in-progress" ${t.status === 'in-progress' ? 'selected' : ''}>In Progress</option>
-                <option value="pending" ${t.status === 'pending' ? 'selected' : ''}>Pending</option>
-                <option value="planning" ${t.status === 'planning' ? 'selected' : ''}>Planning</option>
-                <option value="completed" ${t.status === 'completed' ? 'selected' : ''}>Completed</option>
-            </select>
-
-            <div class="text-xs text-gray-400">${t.lastTouched}</div>
-            <div class="text-xs font-semibold text-gray-500">${t.priority}</div>
-        </div>
-    `).join("");
-}
-
-// Eventos
-els.search.addEventListener("input", render);
-els.status.addEventListener("change", render);
-
-// Inicializar
-loadTasks();
+      // Iniciar
+      if (currentToken) {
+          unlockApp();
+      }
     </script>
   </body>
 </html>
