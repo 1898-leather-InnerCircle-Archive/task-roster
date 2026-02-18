@@ -4,12 +4,19 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>1898 Leather - Task Management System</title>
+
     <link
       href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
       rel="stylesheet"
     />
+
+    <!-- ✅ Supabase JS v2 -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <!-- ✅ Stop favicon 404 (optional) -->
+    <link rel="icon" href="data:," />
+
     <style>
-      /* ====== Original look ====== */
       .priority-high { border-left: 4px solid #ef4444; }
       .priority-medium { border-left: 4px solid #f59e0b; }
       .priority-low { border-left: 4px solid #10b981; }
@@ -18,7 +25,6 @@
       .task-row:hover { background-color: #f9fafb; }
       .header-row { background-color: #f3f4f6; font-weight: 600; }
 
-      /* ====== Pills (your original palette) ====== */
       .pill {
         display: inline-flex;
         align-items: center;
@@ -42,7 +48,6 @@
 
       .tab-active { background: #111827; color: #fff; }
 
-      /* ====== Selects that LOOK like pills ====== */
       .pill-select {
         -webkit-appearance: none;
         -moz-appearance: none;
@@ -66,23 +71,19 @@
         padding-right: 26px;
       }
 
-      /* Status select colors */
       .sel-inprogress { background-color: #fef3c7; color: #92400e; }
       .sel-pending { background-color: #dbeafe; color: #1e40af; }
       .sel-planning { background-color: #e0e7ff; color: #3730a3; }
       .sel-completed { background-color: #d1fae5; color: #065f46; }
 
-      /* Bucket select colors */
       .sel-do { background-color: #fee2e2; color: #991b1b; }
       .sel-schedule { background-color: #e0f2fe; color: #075985; }
       .sel-delegate { background-color: #fef9c3; color: #854d0e; }
 
-      /* Priority select colors */
       .sel-High { background-color: #fee2e2; color: #991b1b; }
       .sel-Medium { background-color: #fef3c7; color: #92400e; }
       .sel-Low { background-color: #d1fae5; color: #065f46; }
 
-      /* Header sort buttons */
       .sort-btn {
         display: inline-flex;
         align-items: center;
@@ -97,10 +98,8 @@
       .sort-active { background: #111827; color: white; }
       .sort-caret { font-size: 10px; opacity: 0.9; }
 
-      /* Modal polish */
       .modal-backdrop { backdrop-filter: blur(8px); }
 
-      /* Mobile: allow horizontal scroll for table */
       @media (max-width: 768px) {
         .table-wrapper { overflow-x: auto; }
         .table-min { min-width: 1200px; }
@@ -110,7 +109,6 @@
 
   <body class="bg-gray-50 min-h-screen">
     <div class="container mx-auto px-4 py-8 max-w-7xl">
-      <!-- Header -->
       <div class="bg-white rounded-lg shadow-lg p-6 mb-8">
         <div class="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
           <div>
@@ -127,7 +125,6 @@
         </div>
       </div>
 
-      <!-- Controls -->
       <div class="bg-white rounded-lg shadow p-6 mb-8">
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
           <div>
@@ -165,7 +162,6 @@
               </div>
             </div>
 
-            <!-- Add Task Button -->
             <div class="flex justify-end">
               <button
                 id="addTaskBtn"
@@ -177,16 +173,11 @@
           </div>
         </div>
 
-        <!-- (Optional) Local persistence actions -->
-        <div class="mt-4 flex flex-wrap gap-2 text-xs">
-          <button id="resetLocalBtn" class="px-3 py-2 rounded border border-gray-200 hover:bg-gray-50">
-            Reset local changes (reload tasks.json)
-          </button>
-          <span class="text-gray-400">Tip: browser can’t write back to tasks.json without backend/GitHub API.</span>
+        <div class="mt-4 text-xs text-gray-400">
+          Data is stored in Supabase • Changes sync across devices.
         </div>
       </div>
 
-      <!-- Statistics Cards -->
       <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
         <div class="bg-white rounded-lg shadow p-6">
           <div id="activeTasks" class="text-2xl font-bold text-blue-600">0</div>
@@ -206,14 +197,12 @@
         </div>
       </div>
 
-      <!-- Task List -->
       <div class="bg-white rounded-lg shadow mb-8 overflow-hidden table-wrapper">
         <div class="px-6 py-4 border-b border-gray-200">
-          <h3 class="text-lg font-semibold text-gray-900">Tasks (Editable: Status / Eisenhower / Priority)</h3>
+          <h3 class="text-lg font-semibold text-gray-900">Tasks (Supabase)</h3>
           <p class="text-xs text-gray-500 mt-1">Click column headers to sort (logical ordering for Status/Priority/Eisenhower).</p>
         </div>
 
-        <!-- Header Row -->
         <div class="header-row px-6 py-3 grid grid-cols-1 md:grid-cols-7 gap-4 text-sm text-gray-700 items-center table-min">
           <div><span class="sort-btn" data-sort="id">ID <span class="sort-caret">↕</span></span></div>
           <div><span class="sort-btn" data-sort="name">Task Name <span class="sort-caret">↕</span></span></div>
@@ -224,16 +213,12 @@
           <div class="text-right"><span class="sort-btn" data-sort="lastTouched">Actions / Date <span class="sort-caret">↕</span></span></div>
         </div>
 
-        <!-- Rows -->
         <div id="taskRows" class="divide-y divide-gray-200 table-min"></div>
       </div>
 
-      <!-- Footer -->
       <div class="mt-8 text-center text-gray-500 text-sm">
         <p id="footerUpdated"></p>
-        <p class="mt-1 text-xs text-gray-400">
-          Note: In Live Server, tasks.json loads fine, but edits/additions won’t modify the file unless you implement GitHub sync or backend.
-        </p>
+        <p class="mt-1 text-xs text-gray-400">Note: This version stores tasks in Supabase (cloud).</p>
       </div>
     </div>
 
@@ -368,13 +353,23 @@
 
     <script>
       // =========================
-      // ✅ LOAD tasks.json CONFIG
+      // ✅ SUPABASE CONFIG (blinded against double execution)
       // =========================
-      const TASKS_JSON_URL = "./tasks.json"; // <-- if tasks.json is in same folder
-      const STORAGE_KEY = "task_roster_local_v1";
+      const SUPABASE_URL = "https://oyfmmpvpcqreivtkukjv.supabase.co";
+      const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_tIbfNdJr59KSj7jEIaOaAQ_2cT-z8iA";
 
-      const TODAY = "2026-02-16";
-      let tasks = []; // will be loaded
+      // Use a single global instance even if script runs twice
+      const supabaseClient =
+        window.__supabaseClient__ ||
+        (window.__supabaseClient__ = window.supabase.createClient(
+          SUPABASE_URL,
+          SUPABASE_PUBLISHABLE_KEY
+        ));
+
+      // =========================
+      // ✅ APP STATE
+      // =========================
+      let tasks = [];
 
       // ====== UI HELPERS ======
       const priorityClass = (p) => (p === "High" ? "priority-high" : p === "Medium" ? "priority-medium" : "priority-low");
@@ -396,9 +391,8 @@
 
       const prioritySelectClass = (p) => (p === "High" ? "sel-High" : p === "Medium" ? "sel-Medium" : "sel-Low");
 
-      // ====== SORTING (LOGICAL, NOT ALPHABETICAL) ======
+      // ====== SORTING ======
       let sortState = { key: "id", asc: true };
-
       const SORT_ORDER = {
         status: ["pending", "planning", "in-progress", "completed"],
         priority: ["High", "Medium", "Low"],
@@ -411,7 +405,6 @@
         const idx = list.indexOf(value);
         return idx === -1 ? 999 : idx;
       }
-
       function norm(v) { return v === null || v === undefined ? "" : String(v).trim(); }
 
       function sortBy(key) {
@@ -519,7 +512,7 @@
       };
 
       // =========================
-      // ✅ LOADING + LOCAL STORAGE
+      // ✅ SUPABASE MAPPERS
       // =========================
       function sanitizeTask(t) {
         return {
@@ -533,58 +526,84 @@
         };
       }
 
-      function saveLocal() {
-        try { localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks)); }
-        catch (e) { console.warn("localStorage save failed:", e); }
+      function rowToTask(r) {
+        return sanitizeTask({
+          id: r.id,
+          name: r.name,
+          notes: r.notes,
+          status: r.status,
+          bucket: r.bucket,
+          priority: r.priority,
+          lastTouched: r.last_touched,
+        });
       }
 
-      function loadLocal() {
-        try {
-          const raw = localStorage.getItem(STORAGE_KEY);
-          if (!raw) return null;
-          const parsed = JSON.parse(raw);
-          if (!Array.isArray(parsed)) return null;
-          return parsed.map(sanitizeTask);
-        } catch {
-          return null;
-        }
+      function taskToRow(t) {
+        return {
+          id: t.id,
+          name: t.name,
+          notes: t.notes || "",
+          status: t.status,
+          bucket: t.bucket,
+          priority: t.priority,
+          last_touched: t.lastTouched || new Date().toISOString().split("T")[0],
+        };
       }
 
+      // =========================
+      // ✅ SUPABASE CRUD
+      // =========================
       async function loadTasks() {
-        // 1) Prefer local edits if they exist
-        const local = loadLocal();
-        if (local && local.length) {
-          tasks = local;
-          els.dataSourceLabel.textContent = "Data source: local changes (browser)";
-          updateSortUI();
-          render();
-          return;
-        }
-
-        // 2) Otherwise load tasks.json
         try {
-          const resp = await fetch(`${TASKS_JSON_URL}?t=${Date.now()}`);
-          if (!resp.ok) throw new Error(`Failed to load tasks.json (HTTP ${resp.status})`);
-          const data = await resp.json();
-          if (!Array.isArray(data)) throw new Error("tasks.json must be an array");
+          els.dataSourceLabel.textContent = "Data source: Supabase";
 
-          tasks = data.map(sanitizeTask);
-          els.dataSourceLabel.textContent = "Data source: tasks.json";
+          const { data, error } = await supabaseClient
+            .from("tasks")
+            .select("*")
+            .order("created_at", { ascending: false });
+
+          console.log("[Supabase] loadTasks data:", data);
+          console.log("[Supabase] loadTasks error:", error);
+
+          if (error) throw error;
+
+          tasks = (data || []).map(rowToTask);
           updateSortUI();
           render();
         } catch (e) {
-          console.error("LOAD ERROR:", e);
-          els.dataSourceLabel.textContent = "Data source: ERROR loading tasks.json (see console)";
+          console.error("SUPABASE LOAD ERROR:", e);
+          els.dataSourceLabel.textContent = "Data source: ERROR (check console, RLS policies, table name)";
           els.rows.innerHTML = `
             <div class="px-6 py-8 text-center text-sm text-red-600 font-semibold">
-              Could not load tasks.json. Make sure tasks.json is in the same folder and Live Server is running.
+              Could not load tasks from Supabase. Open DevTools console for details.
             </div>
           `;
         }
       }
 
+      async function upsertTask(t) {
+        const row = taskToRow(t);
+        const { error } = await supabaseClient.from("tasks").upsert(row);
+        if (error) throw error;
+      }
+
+      async function updateTaskInSupabase(id, fields) {
+        const payload = { ...fields };
+        if ("lastTouched" in payload) {
+          payload.last_touched = payload.lastTouched;
+          delete payload.lastTouched;
+        }
+        const { error } = await supabaseClient.from("tasks").update(payload).eq("id", id);
+        if (error) throw error;
+      }
+
+      async function deleteTaskInSupabase(id) {
+        const { error } = await supabaseClient.from("tasks").delete().eq("id", id);
+        if (error) throw error;
+      }
+
       // ====== ACTIONS ======
-      function updateTask(id, fields) {
+      async function updateTask(id, fields) {
         const idx = tasks.findIndex((x) => x.id === id);
         if (idx === -1) return;
 
@@ -593,17 +612,38 @@
           ...fields,
           lastTouched: new Date().toISOString().split("T")[0],
         };
-
-        saveLocal();
         render();
+
+        try {
+          await updateTaskInSupabase(id, {
+            ...fields,
+            lastTouched: tasks[idx].lastTouched,
+          });
+        } catch (e) {
+          console.error("SUPABASE UPDATE ERROR:", e);
+          alert("No se pudo guardar en Supabase. Revisa consola.");
+          loadTasks();
+        }
       }
 
-      function deleteTask(id) {
+      async function deleteTask(id) {
         if (!confirm("Delete this task?")) return;
+
         tasks = tasks.filter((t) => t.id !== id);
-        saveLocal();
         render();
+
+        try {
+          await deleteTaskInSupabase(id);
+        } catch (e) {
+          console.error("SUPABASE DELETE ERROR:", e);
+          alert("No se pudo borrar en Supabase. Revisa consola.");
+          loadTasks();
+        }
       }
+
+      // ✅ expose to window so inline handlers work everywhere
+      window.updateTask = updateTask;
+      window.deleteTask = deleteTask;
 
       // ====== EDIT MODAL ======
       const editOverlay = document.getElementById("editOverlay");
@@ -635,14 +675,17 @@
         editingId = null;
       }
 
-      function saveEdit() {
+      async function saveEdit() {
         if (!editingId) return;
         const name = (document.getElementById("editTaskName").value || "").trim();
         const notes = (document.getElementById("editTaskNotes").value || "").trim();
         if (!name) return showEditError("Task Name can't be empty.");
-        updateTask(editingId, { name, notes });
+
+        await updateTask(editingId, { name, notes });
         closeEdit();
       }
+
+      window.openEdit = openEdit;
 
       // ====== ADD TASK MODAL ======
       const modal = document.getElementById("modalOverlay");
@@ -667,7 +710,7 @@
       function generateId() { return `T-${Math.floor(Math.random() * 9000) + 1000}`; }
       function idExists(id) { return tasks.some((t) => t.id === id); }
 
-      function submitNewTask() {
+      async function submitNewTask() {
         clearModalError();
 
         let id = normalizeId(document.getElementById("newTaskId").value);
@@ -680,7 +723,7 @@
         if (!name) return showModalError("Task Name is required.");
         if (!id) id = generateId();
 
-        if (!/^[A-Za-z]+(?:-[A-Za-z]+)?-\d+$/.test(id) && !/^T-\d+$/.test(id)) {
+        if (!/^[A-Za-z]+(?:-[A-Za-z]+)?-\\d+$/.test(id) && !/^T-\\d+$/.test(id)) {
           return showModalError("Invalid ID format. Use DO-001, SCH-010, TASK-004 or leave blank for auto ID.");
         }
         if (idExists(id)) return showModalError("That ID already exists. Use another ID.");
@@ -691,7 +734,16 @@
         });
 
         tasks.unshift(newTask);
-        saveLocal();
+        render();
+
+        try {
+          await upsertTask(newTask);
+        } catch (e) {
+          console.error("SUPABASE INSERT ERROR:", e);
+          alert("No se pudo crear en Supabase. Revisa consola (RLS/tabla).");
+          loadTasks();
+          return;
+        }
 
         document.getElementById("newTaskId").value = "";
         document.getElementById("newTaskName").value = "";
@@ -701,14 +753,11 @@
         document.getElementById("newTaskPriority").value = "Medium";
 
         closeModal();
-        render();
       }
 
-      // Close modals on click outside
       modal.addEventListener("click", (e) => { if (e.target === modal) closeModal(); });
       editOverlay.addEventListener("click", (e) => { if (e.target === editOverlay) closeEdit(); });
 
-      // Close on ESC
       document.addEventListener("keydown", (e) => {
         if (e.key !== "Escape") return;
         if (!modal.classList.contains("hidden")) closeModal();
@@ -717,11 +766,17 @@
 
       // ====== RENDER ======
       function render() {
+        setUpdatedText();
+
         const filtered = tasks.filter(matchFilters);
         computeStats(filtered);
 
         if (!filtered.length) {
-          els.rows.innerHTML = '<div class="px-6 py-8 text-center text-sm text-gray-500">No tasks match your filters.</div>';
+          els.rows.innerHTML = `
+            <div class="px-6 py-8 text-center text-sm text-gray-500">
+              No tasks found. If you expected tasks, check Supabase table <span class="font-mono">public.tasks</span> and RLS policies.
+            </div>
+          `;
           return;
         }
 
@@ -772,7 +827,6 @@
         `).join("");
       }
 
-      // ====== SAFE ESCAPES ======
       function escapeHtml(str) {
         return String(str).replace(/[&<>"']/g, (s) => ({
           "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
@@ -797,27 +851,25 @@
         btn.addEventListener("click", () => sortBy(btn.getAttribute("data-sort")));
       });
 
-      // Add task modal buttons
       document.getElementById("addTaskBtn").addEventListener("click", openModal);
       document.getElementById("closeModalBtn").addEventListener("click", closeModal);
       document.getElementById("cancelModalBtn").addEventListener("click", closeModal);
       document.getElementById("saveTaskBtn").addEventListener("click", submitNewTask);
 
-      // Edit modal buttons
       document.getElementById("closeEditBtn").addEventListener("click", closeEdit);
       document.getElementById("cancelEditBtn").addEventListener("click", closeEdit);
       document.getElementById("saveEditBtn").addEventListener("click", saveEdit);
 
-      // Reset local
-      document.getElementById("resetLocalBtn").addEventListener("click", () => {
-        if (!confirm("This will delete local changes and reload tasks.json. Continue?")) return;
-        localStorage.removeItem(STORAGE_KEY);
-        els.dataSourceLabel.textContent = "Data source: tasks.json (reloading...)";
-        loadTasks();
-      });
+      // ====== REALTIME SYNC (subscribe once)
+      if (!window.__tasksRealtimeSubscribed__) {
+        window.__tasksRealtimeSubscribed__ = true;
+        supabaseClient
+          .channel("tasks-realtime")
+          .on("postgres_changes", { event: "*", schema: "public", table: "tasks" }, () => loadTasks())
+          .subscribe();
+      }
 
-      // ====== INIT ======
-      setUpdatedText();
+      // ====== INIT
       updateSortUI();
       loadTasks();
     </script>
