@@ -100,32 +100,54 @@
 
       .modal-backdrop { backdrop-filter: blur(8px); }
 
+      /* ✅ Notes wrapping */
+      .wrap-anywhere { overflow-wrap: anywhere; word-break: break-word; }
+
+      /* ✅ simple clamp without plugin */
+      .clamp-3 {
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 3;
+        overflow: hidden;
+      }
+
+      /* Mobile: allow horizontal scroll for table if needed, but we now use cards in mobile */
       @media (max-width: 768px) {
-        .table-wrapper { overflow-x: auto; }
-        .table-min { min-width: 1200px; }
+        .table-wrapper { overflow-x: hidden; }
+        .table-min { min-width: 0; }
       }
     </style>
   </head>
 
   <body class="bg-gray-50 min-h-screen">
-    <div class="container mx-auto px-4 py-8 max-w-7xl">
-      <div class="bg-white rounded-lg shadow-lg p-6 mb-8">
-        <div class="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
+    <div class="container mx-auto px-4 py-6 md:py-8 max-w-7xl">
+      <!-- Header -->
+      <div class="bg-white rounded-lg shadow-lg p-5 md:p-6 mb-6 md:mb-8">
+        <div class="flex flex-col md:flex-row md:justify-between md:items-center gap-3 md:gap-4">
           <div>
-            <h1 class="text-3xl font-bold text-gray-900">1898 Leather</h1>
-            <h2 class="text-xl text-gray-600">Task Management System</h2>
-            <p id="lastUpdated" class="text-gray-500 mt-2"></p>
+            <h1 class="text-2xl md:text-3xl font-bold text-gray-900">1898 Leather</h1>
+            <h2 class="text-lg md:text-xl text-gray-600">Task Management System</h2>
+            <p id="lastUpdated" class="text-gray-500 mt-2 text-sm md:text-base"></p>
             <p id="dataSourceLabel" class="text-xs text-gray-400 mt-1"></p>
           </div>
 
-          <div class="text-right">
-            <div id="totalTasks" class="text-2xl font-bold text-blue-600">0</div>
-            <div class="text-sm text-gray-500">Total Tasks</div>
+          <div class="md:text-right flex md:block items-center justify-between md:justify-end gap-3">
+            <div>
+              <div id="totalTasks" class="text-2xl md:text-2xl font-bold text-blue-600">0</div>
+              <div class="text-sm text-gray-500">Total Tasks</div>
+            </div>
+            <button
+              id="addTaskBtnTop"
+              class="md:hidden px-4 py-3 rounded-lg bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 transition"
+            >
+              + Add
+            </button>
           </div>
         </div>
       </div>
 
-      <div class="bg-white rounded-lg shadow p-6 mb-8">
+      <!-- Controls -->
+      <div class="bg-white rounded-lg shadow p-5 md:p-6 mb-6 md:mb-8">
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
           <div>
             <label class="block text-xs uppercase tracking-widest text-gray-500" for="searchInput">Search</label>
@@ -162,7 +184,8 @@
               </div>
             </div>
 
-            <div class="flex justify-end">
+            <!-- Add Task Button (desktop) -->
+            <div class="hidden md:flex justify-end">
               <button
                 id="addTaskBtn"
                 class="px-4 py-3 rounded-lg bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 transition"
@@ -178,32 +201,35 @@
         </div>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-        <div class="bg-white rounded-lg shadow p-6">
+      <!-- Stats -->
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 mb-6 md:mb-8">
+        <div class="bg-white rounded-lg shadow p-5 md:p-6">
           <div id="activeTasks" class="text-2xl font-bold text-blue-600">0</div>
-          <div class="text-sm text-gray-500">Active Tasks</div>
+          <div class="text-sm text-gray-500">Active</div>
         </div>
-        <div class="bg-white rounded-lg shadow p-6">
+        <div class="bg-white rounded-lg shadow p-5 md:p-6">
           <div id="completedTasks" class="text-2xl font-bold text-green-600">0</div>
           <div class="text-sm text-gray-500">Completed</div>
         </div>
-        <div class="bg-white rounded-lg shadow p-6">
+        <div class="bg-white rounded-lg shadow p-5 md:p-6">
           <div id="inProgressTasks" class="text-2xl font-bold text-yellow-600">0</div>
           <div class="text-sm text-gray-500">In Progress</div>
         </div>
-        <div class="bg-white rounded-lg shadow p-6">
+        <div class="bg-white rounded-lg shadow p-5 md:p-6">
           <div id="highPriorityTasks" class="text-2xl font-bold text-red-600">0</div>
           <div class="text-sm text-gray-500">High Priority</div>
         </div>
       </div>
 
+      <!-- Task List -->
       <div class="bg-white rounded-lg shadow mb-8 overflow-hidden table-wrapper">
-        <div class="px-6 py-4 border-b border-gray-200">
+        <div class="px-5 md:px-6 py-4 border-b border-gray-200">
           <h3 class="text-lg font-semibold text-gray-900">Tasks (Supabase)</h3>
-          <p class="text-xs text-gray-500 mt-1">Click column headers to sort (logical ordering for Status/Priority/Eisenhower).</p>
+          <p class="text-xs text-gray-500 mt-1">Desktop: sortable table • Mobile: cards.</p>
         </div>
 
-        <div class="header-row px-6 py-3 grid grid-cols-1 md:grid-cols-7 gap-4 text-sm text-gray-700 items-center table-min">
+        <!-- Header Row (desktop only) -->
+        <div class="hidden md:grid header-row px-6 py-3 grid-cols-7 gap-4 text-sm text-gray-700 items-center">
           <div><span class="sort-btn" data-sort="id">ID <span class="sort-caret">↕</span></span></div>
           <div><span class="sort-btn" data-sort="name">Task Name <span class="sort-caret">↕</span></span></div>
           <div>Notes</div>
@@ -213,7 +239,8 @@
           <div class="text-right"><span class="sort-btn" data-sort="lastTouched">Actions / Date <span class="sort-caret">↕</span></span></div>
         </div>
 
-        <div id="taskRows" class="divide-y divide-gray-200 table-min"></div>
+        <!-- Rows -->
+        <div id="taskRows" class="divide-y divide-gray-200"></div>
       </div>
 
       <div class="mt-8 text-center text-gray-500 text-sm">
@@ -358,7 +385,6 @@
       const SUPABASE_URL = "https://oyfmmpvpcqreivtkukjv.supabase.co";
       const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_tIbfNdJr59KSj7jEIaOaAQ_2cT-z8iA";
 
-      // Use a single global instance even if script runs twice
       const supabaseClient =
         window.__supabaseClient__ ||
         (window.__supabaseClient__ = window.supabase.createClient(
@@ -562,9 +588,6 @@
             .select("*")
             .order("created_at", { ascending: false });
 
-          console.log("[Supabase] loadTasks data:", data);
-          console.log("[Supabase] loadTasks error:", error);
-
           if (error) throw error;
 
           tasks = (data || []).map(rowToTask);
@@ -641,7 +664,6 @@
         }
       }
 
-      // ✅ expose to window so inline handlers work everywhere
       window.updateTask = updateTask;
       window.deleteTask = deleteTask;
 
@@ -723,7 +745,7 @@
         if (!name) return showModalError("Task Name is required.");
         if (!id) id = generateId();
 
-        if (!/^[A-Za-z]+(?:-[A-Za-z]+)?-\\d+$/.test(id) && !/^T-\\d+$/.test(id)) {
+        if (!/^[A-Za-z]+(?:-[A-Za-z]+)?-\d+$/.test(id) && !/^T-\d+$/.test(id)) {
           return showModalError("Invalid ID format. Use DO-001, SCH-010, TASK-004 or leave blank for auto ID.");
         }
         if (idExists(id)) return showModalError("That ID already exists. Use another ID.");
@@ -764,7 +786,7 @@
         if (!editOverlay.classList.contains("hidden")) closeEdit();
       });
 
-      // ====== RENDER ======
+      // ====== RENDER (desktop table + mobile cards)
       function render() {
         setUpdatedText();
 
@@ -774,17 +796,71 @@
         if (!filtered.length) {
           els.rows.innerHTML = `
             <div class="px-6 py-8 text-center text-sm text-gray-500">
-              No tasks found. If you expected tasks, check Supabase table <span class="font-mono">public.tasks</span> and RLS policies.
+              No tasks match your filters.
             </div>
           `;
           return;
         }
 
         els.rows.innerHTML = filtered.map((t) => `
-          <div class="task-row px-6 py-4 grid grid-cols-1 md:grid-cols-7 gap-4 items-start ${priorityClass(t.priority)}">
+          <!-- MOBILE CARD -->
+          <div class="md:hidden p-4 ${priorityClass(t.priority)}">
+            <div class="flex items-start justify-between gap-3">
+              <div class="min-w-0">
+                <div class="text-xs text-gray-500 font-mono">${escapeHtml(t.id)}</div>
+                <div class="font-semibold text-gray-900 mt-1 wrap-anywhere">${escapeHtml(t.name)}</div>
+              </div>
+              <div class="text-xs text-gray-500 whitespace-nowrap">${escapeHtml(t.lastTouched || "")}</div>
+            </div>
+
+            <div class="mt-3 text-sm text-gray-600 wrap-anywhere clamp-3">${escapeHtml(t.notes || "")}</div>
+
+            <div class="mt-4 grid grid-cols-3 gap-2">
+              <div>
+                <div class="text-[10px] uppercase tracking-widest text-gray-400 mb-1">Status</div>
+                <select class="pill-select ${statusSelectClass(t.status)}"
+                  onchange="updateTask('${escapeAttr(t.id)}', { status: this.value })">
+                  <option value="pending" ${t.status === "pending" ? "selected" : ""}>Pending</option>
+                  <option value="planning" ${t.status === "planning" ? "selected" : ""}>Planning</option>
+                  <option value="in-progress" ${t.status === "in-progress" ? "selected" : ""}>In Progress</option>
+                  <option value="completed" ${t.status === "completed" ? "selected" : ""}>Completed</option>
+                </select>
+              </div>
+
+              <div>
+                <div class="text-[10px] uppercase tracking-widest text-gray-400 mb-1">Bucket</div>
+                <select class="pill-select ${bucketSelectClass(t.bucket)}"
+                  onchange="updateTask('${escapeAttr(t.id)}', { bucket: this.value })">
+                  <option value="do" ${t.bucket === "do" ? "selected" : ""}>DO</option>
+                  <option value="schedule" ${t.bucket === "schedule" ? "selected" : ""}>SCHEDULE</option>
+                  <option value="delegate" ${t.bucket === "delegate" ? "selected" : ""}>DELEGATE</option>
+                </select>
+              </div>
+
+              <div>
+                <div class="text-[10px] uppercase tracking-widest text-gray-400 mb-1">Priority</div>
+                <select class="pill-select ${prioritySelectClass(t.priority)}"
+                  onchange="updateTask('${escapeAttr(t.id)}', { priority: this.value })">
+                  <option value="High" ${t.priority === "High" ? "selected" : ""}>HIGH</option>
+                  <option value="Medium" ${t.priority === "Medium" ? "selected" : ""}>MEDIUM</option>
+                  <option value="Low" ${t.priority === "Low" ? "selected" : ""}>LOW</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="mt-4 flex gap-2">
+              <button class="flex-1 px-3 py-2 rounded bg-blue-600 text-white text-xs font-semibold hover:bg-blue-700"
+                onclick="openEdit('${escapeAttr(t.id)}')">Edit</button>
+              <button class="flex-1 px-3 py-2 rounded bg-red-600 text-white text-xs font-semibold hover:bg-red-700"
+                onclick="deleteTask('${escapeAttr(t.id)}')">Delete</button>
+            </div>
+          </div>
+
+          <!-- DESKTOP ROW -->
+          <div class="hidden md:grid task-row px-6 py-4 grid-cols-7 gap-4 items-start ${priorityClass(t.priority)}">
             <div class="font-mono text-sm text-gray-600">${escapeHtml(t.id)}</div>
-            <div class="font-semibold text-gray-900">${escapeHtml(t.name)}</div>
-            <div class="text-gray-600 text-sm">${escapeHtml(t.notes || "")}</div>
+            <div class="font-semibold text-gray-900 wrap-anywhere">${escapeHtml(t.name)}</div>
+            <div class="text-gray-600 text-sm wrap-anywhere clamp-3">${escapeHtml(t.notes || "")}</div>
 
             <div>
               <select class="pill-select ${statusSelectClass(t.status)}"
@@ -851,7 +927,10 @@
         btn.addEventListener("click", () => sortBy(btn.getAttribute("data-sort")));
       });
 
+      // open modal from both buttons
       document.getElementById("addTaskBtn").addEventListener("click", openModal);
+      document.getElementById("addTaskBtnTop").addEventListener("click", openModal);
+
       document.getElementById("closeModalBtn").addEventListener("click", closeModal);
       document.getElementById("cancelModalBtn").addEventListener("click", closeModal);
       document.getElementById("saveTaskBtn").addEventListener("click", submitNewTask);
