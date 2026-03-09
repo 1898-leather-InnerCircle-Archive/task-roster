@@ -196,6 +196,14 @@
           </div>
         </div>
 
+        <div class="mt-4 flex flex-wrap items-center gap-3">
+          <label class="inline-flex items-center gap-2 text-sm text-gray-600 select-none cursor-pointer">
+            <input id="toggleCompleted" type="checkbox" class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-200" />
+            <span>Show completed</span>
+          </label>
+          <span class="text-xs text-gray-400">Completed tasks are hidden by default.</span>
+        </div>
+
         <div class="mt-4 text-xs text-gray-400">
           Data is stored in Supabase • Changes sync across devices.
         </div>
@@ -492,6 +500,7 @@
         rows: document.getElementById("taskRows"),
         search: document.getElementById("searchInput"),
         status: document.getElementById("statusFilter"),
+        toggleCompleted: document.getElementById("toggleCompleted"),
         tabs: Array.from(document.querySelectorAll(".tab")),
         total: document.getElementById("totalTasks"),
         active: document.getElementById("activeTasks"),
@@ -527,14 +536,16 @@
       const matchFilters = (t) => {
         const q = (els.search.value || "").toLowerCase().trim();
         const st = els.status.value;
+        const showCompleted = !!els.toggleCompleted?.checked;
 
         const tabMatch = activeTab === "all" ? true : t.bucket === activeTab;
         const statusMatch = st === "all" ? true : t.status === st;
+        const completedMatch = showCompleted ? true : t.status !== "completed";
 
         const text = `${t.id} ${t.name} ${t.notes} ${t.priority} ${t.lastTouched} ${t.bucket}`.toLowerCase();
         const queryMatch = !q ? true : text.includes(q);
 
-        return tabMatch && statusMatch && queryMatch;
+        return tabMatch && statusMatch && completedMatch && queryMatch;
       };
 
       // =========================
@@ -912,7 +923,16 @@
 
       // ====== EVENTS ======
       els.search.addEventListener("input", render);
-      els.status.addEventListener("change", render);
+      els.status.addEventListener("change", () => {
+        if (els.status.value === "completed") els.toggleCompleted.checked = true;
+        render();
+      });
+      els.toggleCompleted.addEventListener("change", () => {
+        if (!els.toggleCompleted.checked && els.status.value === "completed") {
+          els.status.value = "all";
+        }
+        render();
+      });
 
       els.tabs.forEach((btn) => {
         btn.addEventListener("click", () => {
